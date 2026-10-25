@@ -13,7 +13,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.12",
         "laravel/tinker": "^2.9",
-        "minishlink/web-push": "^9.0",
+        "minishlink/web-push": "^11.0",
         "socialiteproviders/eveonline": "^4.3"
     },
     "require-dev": {
