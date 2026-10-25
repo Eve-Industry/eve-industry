@@ -10,7 +10,7 @@ COPY docs/openapi.json /build/docs/openapi.json
 COPY frontend/ ./
 RUN npm run build
 
-FROM php:8.3-fpm-bookworm
+FROM php:8.5-fpm-bookworm
 
 # Install system dependencies and nginx
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -27,7 +27,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# PHP extensions
+# PHP extensions. OPcache is built into PHP 8.5 and later (docker/opcache.ini
+# configures it), so it is no longer installed here.
 RUN docker-php-ext-configure intl \
     && docker-php-ext-install \
     pdo_mysql \
@@ -38,8 +39,7 @@ RUN docker-php-ext-configure intl \
     bz2 \
     gd \
     zip \
-    intl \
-    opcache
+    intl
 
 # Redis extension
 RUN pecl install redis && docker-php-ext-enable redis

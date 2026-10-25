@@ -46,7 +46,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.5'
           extensions: zip, bcmath, intl, pdo_sqlite
           coverage: none
           tools: composer:v2
@@ -150,7 +150,8 @@ jobs:
         run: docker/smoke-test.sh http://127.0.0.1:8080
 
       - name: Worker is healthy and logs
-        if: always()
+        # Only once the stack was configured; otherwise this masks an earlier build failure.
+        if: always() && hashFiles('deploy/.env') != ''
         working-directory: deploy
         run: |
           docker compose ps worker scheduler
