@@ -64,6 +64,16 @@ chmod +x update.sh backup.sh restore.sh
 if [ -f .env ]; then
   say ".env already exists, keeping it."
 else
+  # MySQL sets its passwords only when it first creates its volume, so a new .env
+  # (with new passwords) cannot work against data left by an earlier install.
+  db_volume="${COMPOSE_PROJECT_NAME:-eve-industry}_mysql-data"
+  if docker volume inspect "$db_volume" >/dev/null 2>&1; then
+    die "There is no .env in $INSTALL_DIR, but the database volume $db_volume from an earlier install still exists.
+A new .env would have new passwords that this database rejects. Either:
+  - keep that data: put the earlier .env back in $INSTALL_DIR and run this installer again, or
+  - delete it (all data from the earlier install is lost): run 'docker compose down -v' in $INSTALL_DIR, then run this installer again."
+  fi
+
   ask DOMAIN "Public domain name (or 'localhost' to try it locally)" "localhost"
   PROXY="${PROXY:-caddy}"
 
