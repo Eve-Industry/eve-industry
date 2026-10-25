@@ -1,8 +1,10 @@
 # Production image: nginx + PHP-FPM, Horizon, scheduler and one-off tasks in one
 # image, selected by APP_ROLE (see docker/start.sh). Runs as www-data.
 
-# Build the React app (frontend/ -> public/app).
-FROM node:26-alpine AS frontend
+# Build the React app (frontend/ -> public/app). The output is plain JavaScript and
+# CSS, identical on every architecture, so run this stage on the build machine's own
+# architecture instead of emulating it once per target platform.
+FROM --platform=$BUILDPLATFORM node:26-alpine AS frontend
 WORKDIR /build/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund
