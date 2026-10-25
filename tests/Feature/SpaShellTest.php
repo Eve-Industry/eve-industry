@@ -55,9 +55,9 @@ class SpaShellTest extends TestCase
 
         foreach (['/app', '/app/', '/app/characters', '/app/market-status/deep/link'] as $path) {
             $response = $this->actingAs($user)->get($path);
-            $this->assertSame($this->index, $response->baseResponse->getFile()->getPathname());
             $response
                 ->assertOk()
+                ->assertSee('spa-shell-test', false)
                 ->assertHeader('Content-Type', 'text/html; charset=UTF-8');
             $this->assertStringContainsString('no-cache', $response->headers->get('Cache-Control'));
         }
