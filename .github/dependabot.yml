@@ -8,6 +8,10 @@ updates:
     directory: /frontend
     schedule: { interval: weekly }
     open-pull-requests-limit: 5
+    ignore:
+      # openapi-typescript peers typescript ^5; revisit when it supports 7.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: monthly }
