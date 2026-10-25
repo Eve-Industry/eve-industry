@@ -61,6 +61,12 @@ must be running; if you stop them the data stops updating.
   `COMPOSE_FILE=docker-compose.yml:docker-compose.no-proxy.yml` in `.env`. Caddy is disabled and `web`
   listens on `127.0.0.1:8080`. Forward `X-Forwarded-For` and `X-Forwarded-Proto`. If your proxy is not on a
   private network address, set `TRUSTED_PROXIES` to it.
+* **Choosing the port:** the installer asks for it, or take it from `PORT` (default 80, or 8080 with your own
+  proxy). It is selectable for `DOMAIN=localhost` and `PROXY=none`: for example
+  `PORT=8080 DOMAIN=localhost` gives `http://localhost:8080`, and the EVE callback URL then needs the same
+  port. A public domain with the bundled Caddy must use 80 and 443 (Let's Encrypt needs them), so the
+  installer refuses another port there. Manually, `HTTP_PORT` is the Caddy port (match it in `SITE_ADDRESS`,
+  `APP_URL` and `EVE_REDIRECT_URI`) and `WEB_PORT` is the no-proxy port.
 * Keep `mysql` and both `redis` services off the internet (they publish no ports by default). Do not expose `/horizon`.
 
 ## Updating

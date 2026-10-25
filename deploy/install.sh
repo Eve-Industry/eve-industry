@@ -6,7 +6,9 @@
 # It asks a few questions, writes .env with generated secrets, pulls the image
 # and starts the stack. Re-running never overwrites an existing .env.
 # Non-interactive: set DOMAIN, EVE_CLIENT_ID, EVE_CLIENT_SECRET, ESI_CONTACT,
-# ADMIN_EMAIL (and optionally PROXY=none, EVE_VERSION, INSTALL_DIR) beforehand.
+# ADMIN_EMAIL (and optionally PORT, PROXY=none, EVE_VERSION, INSTALL_DIR) beforehand.
+# PORT defaults to 80 (8080 with PROXY=none) and can be changed for DOMAIN=localhost
+# or PROXY=none, e.g. PORT=8080 DOMAIN=localhost for http://localhost:8080.
 #
 # Provided as is, without warranty. See LICENSE (AGPL-3.0).
 set -euo pipefail
@@ -27,7 +29,9 @@ die() { printf '\033[31mError:\033[0m %s\n' "$*" >&2; exit 1; }
 ask() { # ask VAR "Question" [default] [secret]
   local var="$1" prompt="$2" default="${3:-}" secret="${4:-}" value
   if [ -n "${!var:-}" ]; then return; fi
-  if [ ! -t 0 ] && [ ! -r /dev/tty ]; then
+  # No terminal to ask on (ssh without a tty, CI, containers): -r /dev/tty can be true
+  # even though opening it fails, so test that it actually opens.
+  if [ ! -t 0 ] && ! { : </dev/tty; } 2>/dev/null; then
     [ -n "$default" ] && { printf -v "$var" '%s' "$default"; return; }
     die "$var is required (set it in the environment when running non-interactively)."
   fi
@@ -61,15 +65,33 @@ if [ -f .env ]; then
   say ".env already exists, keeping it."
 else
   ask DOMAIN "Public domain name (or 'localhost' to try it locally)" "localhost"
+  PROXY="${PROXY:-caddy}"
+
+  # The port people connect to. Selectable for localhost and when you bring your own
+  # proxy (PROXY=none, where it is the port web listens on at 127.0.0.1). A public
+  # domain with the bundled Caddy needs 80 and 443 for automatic HTTPS.
+  if [ "$DOMAIN" = "localhost" ] || [ "$PROXY" = "none" ]; then
+    if [ "$PROXY" = "none" ]; then port_default=8080; else port_default=80; fi
+    ask PORT "HTTP port to listen on" "$port_default"
+  else
+    PORT="${PORT:-80}"
+    [ "$PORT" = "80" ] || die "Automatic HTTPS needs ports 80 and 443. Use DOMAIN=localhost or PROXY=none to choose another port."
+  fi
+  case "$PORT" in ''|*[!0-9]*) die "PORT must be a number between 1 and 65535." ;; esac
+  { [ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ]; } || die "PORT must be a number between 1 and 65535."
+
   say "Create an application at https://developers.eveonline.com"
-  if [ "$DOMAIN" = "localhost" ]; then APP_URL="http://localhost"; SITE_ADDRESS="http://localhost"; else APP_URL="https://$DOMAIN"; SITE_ADDRESS="$DOMAIN"; fi
+  if [ "$DOMAIN" = "localhost" ]; then
+    if [ "$PORT" = "80" ]; then APP_URL="http://localhost"; SITE_ADDRESS="http://localhost"; else APP_URL="http://localhost:$PORT"; SITE_ADDRESS="http://localhost:$PORT"; fi
+  else
+    APP_URL="https://$DOMAIN"; SITE_ADDRESS="$DOMAIN"
+  fi
   echo "  Callback URL: $APP_URL/auth/eve/callback"
   echo "  Scopes: see docs/self-hosting/eve-sso.md (enable every scope listed there)"
   ask EVE_CLIENT_ID "EVE client ID"
   ask EVE_CLIENT_SECRET "EVE client secret" "" secret
   ask ESI_CONTACT "Contact email for CCP (sent in the ESI user agent)"
   ask ADMIN_EMAIL "Admin email address" "$ESI_CONTACT"
-  PROXY="${PROXY:-caddy}"
 
   {
     cat <<EOF
@@ -95,10 +117,19 @@ LOG_CHANNEL=daily
 LOG_DAILY_DAYS=5
 LOG_LEVEL=warning
 EOF
-    if [ "$PROXY" = "none" ]; then echo "COMPOSE_FILE=docker-compose.yml:docker-compose.no-proxy.yml"; echo "WEB_PORT=${WEB_PORT:-8080}"; fi
+    if [ "$PROXY" = "none" ]; then
+      echo "COMPOSE_FILE=docker-compose.yml:docker-compose.no-proxy.yml"; echo "WEB_PORT=$PORT"
+    else
+      echo "HTTP_PORT=$PORT"
+    fi
   } > .env
   chmod 600 .env
   say "Wrote .env (back up APP_KEY: losing it makes encrypted data unreadable)."
+fi
+
+if [ -n "${EVE_NO_START:-}" ]; then
+  say "EVE_NO_START is set: configuration written, nothing started."
+  exit 0
 fi
 
 say "Pulling images"

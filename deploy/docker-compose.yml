@@ -69,7 +69,9 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
-      - "80:80"
+      # HTTP_PORT must match the port in SITE_ADDRESS (only for http://localhost:PORT;
+      # automatic HTTPS for a public domain needs 80 and 443).
+      - "${HTTP_PORT:-80}:${HTTP_PORT:-80}"
       - "443:443"
       - "443:443/udp"
     environment:

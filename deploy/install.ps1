@@ -4,6 +4,8 @@
 #
 # Asks a few questions, writes .env with generated secrets, pulls the image and
 # starts the stack. Re-running never overwrites an existing .env.
+# Set PORT to change the port (default 80, or 8080 with PROXY=none) for
+# DOMAIN=localhost or PROXY=none, e.g. $env:PORT='8080'; $env:DOMAIN='localhost'.
 # Provided as is, without warranty. See LICENSE (AGPL-3.0).
 $ErrorActionPreference = 'Stop'
 
@@ -17,12 +19,18 @@ function New-Secret([int]$Length) {
 }
 function Read-Required([string]$Prompt, [string]$Default = '', [switch]$Secret) {
     while ($true) {
-        if ($Secret) {
-            $s = Read-Host $Prompt -AsSecureString
-            $v = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($s))
-        } else {
-            $label = if ($Default) { "$Prompt [$Default]" } else { $Prompt }
-            $v = Read-Host $label
+        try {
+            if ($Secret) {
+                $s = Read-Host $Prompt -AsSecureString
+                $v = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($s))
+            } else {
+                $label = if ($Default) { "$Prompt [$Default]" } else { $Prompt }
+                $v = Read-Host $label
+            }
+        } catch {
+            # No console to ask on (non-interactive session): use the default or ask for the variable.
+            if ($Default) { return $Default }
+            throw "$Prompt is required (set it in the environment when running non-interactively)."
         }
         if (-not $v) { $v = $Default }
         if ($v) { return $v }
@@ -48,7 +56,23 @@ if (Test-Path .env) {
     Write-Host '.env already exists, keeping it.'
 } else {
     $domain = if ($env:DOMAIN) { $env:DOMAIN } else { Read-Required "Public domain name (or 'localhost' to try it locally)" 'localhost' }
-    if ($domain -eq 'localhost') { $appUrl = 'http://localhost'; $site = 'http://localhost' } else { $appUrl = "https://$domain"; $site = $domain }
+    $proxy = if ($env:PROXY) { $env:PROXY } else { 'caddy' }
+
+    # The port people connect to. Selectable for localhost and when you bring your own
+    # proxy (PROXY=none, where it is the port web listens on at 127.0.0.1). A public
+    # domain with the bundled Caddy needs 80 and 443 for automatic HTTPS.
+    if ($domain -eq 'localhost' -or $proxy -eq 'none') {
+        $defaultPort = if ($proxy -eq 'none') { '8080' } else { '80' }
+        $port = if ($env:PORT) { $env:PORT } else { Read-Required 'HTTP port to listen on' $defaultPort }
+    } else {
+        $port = if ($env:PORT) { $env:PORT } else { '80' }
+        if ($port -ne '80') { throw 'Automatic HTTPS needs ports 80 and 443. Use DOMAIN=localhost or PROXY=none to choose another port.' }
+    }
+    if ($port -notmatch '^\d+$' -or [int]$port -lt 1 -or [int]$port -gt 65535) { throw 'PORT must be a number between 1 and 65535.' }
+
+    if ($domain -eq 'localhost') {
+        if ($port -eq '80') { $appUrl = 'http://localhost'; $site = 'http://localhost' } else { $appUrl = "http://localhost:$port"; $site = "http://localhost:$port" }
+    } else { $appUrl = "https://$domain"; $site = $domain }
     Write-Host 'Create an application at https://developers.eveonline.com'
     Write-Host "  Callback URL: $appUrl/auth/eve/callback"
     Write-Host '  Scopes: see docs/self-hosting/eve-sso.md (enable every scope listed there)'
@@ -79,10 +103,13 @@ if (Test-Path .env) {
         "DB_ROOT_PASSWORD=$(New-Secret 32)",
         'LOG_CHANNEL=daily', 'LOG_DAILY_DAYS=5', 'LOG_LEVEL=warning'
     )
-    if ($env:PROXY -eq 'none') { $lines += 'COMPOSE_FILE=docker-compose.yml;docker-compose.no-proxy.yml'; $lines += 'COMPOSE_PATH_SEPARATOR=;'; $lines += 'WEB_PORT=8080' }
+    if ($proxy -eq 'none') { $lines += 'COMPOSE_FILE=docker-compose.yml;docker-compose.no-proxy.yml'; $lines += 'COMPOSE_PATH_SEPARATOR=;'; $lines += "WEB_PORT=$port" }
+    else { $lines += "HTTP_PORT=$port" }
     [IO.File]::WriteAllLines((Join-Path (Get-Location) '.env'), $lines)
     Write-Host 'Wrote .env (back up APP_KEY: losing it makes encrypted data unreadable).'
 }
+
+if ($env:EVE_NO_START) { Write-Host 'EVE_NO_START is set: configuration written, nothing started.'; return }
 
 docker compose pull
 docker compose up -d
