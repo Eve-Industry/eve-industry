@@ -10,7 +10,7 @@ COPY docs/openapi.json /build/docs/openapi.json
 COPY frontend/ ./
 RUN npm run build
 
-FROM php:8.3-fpm-bookworm
+FROM php:8.5-fpm-bookworm
 
 # Install system dependencies and nginx
 RUN apt-get update && apt-get install -y --no-install-recommends \
