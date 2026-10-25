@@ -1,0 +1,27 @@
+/* Brand tokens. */
+:root {
+  --bg: #0b0f17;
+  --panel: #0f1626;
+  --text: #e9eefc;
+  --muted: #a9b5d1;
+  --line: rgba(255, 255, 255, 0.1);
+  --accent: #7aa7ff;
+  --accent2: #6ee7ff;
+  /* The accent colours as comma-separated RGB, for translucent variants: rgba(var(--accent-rgb), 0.2).
+     A theme that changes --accent or --accent2 must change these too. */
+  --accent-rgb: 122, 167, 255;
+  --accent2-rgb: 110, 231, 255;
+  --panel2: #0c1322;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --ok: #7cffb2;
+  --warn: #ffb347;
+  --bad: #ff7a7a;
+  /* Slot kinds, carried over from the Blade slots page. */
+  --manufacturing: #6fb1ff;
+  --research: #b091ff;
+  --reactions: #ffb86b;
+  --font-display: 'Orbitron', system-ui, sans-serif;
+  --font-body: 'Rajdhani', system-ui, sans-serif;
+  --sidebar-width: 260px;
+  color-scheme: dark;
+}

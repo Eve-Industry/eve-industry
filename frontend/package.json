@@ -1,0 +1,45 @@
+{
+  "name": "eve-industrialist-frontend",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && tsc -p tsconfig.sw.json --noEmit && vite build",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.sw.json --noEmit",
+    "test": "vitest run",
+    "gen:api": "openapi-typescript ../docs/openapi.json -o src/api/schema.d.ts",
+    "size": "size-limit"
+  },
+  "dependencies": {
+    "@tanstack/query-async-storage-persister": "5.62.0",
+    "@tanstack/react-query": "5.62.0",
+    "@tanstack/react-query-persist-client": "5.62.0",
+    "idb-keyval": "6.2.1",
+    "openapi-fetch": "0.13.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-router-dom": "7.1.1"
+  },
+  "devDependencies": {
+    "@size-limit/file": "11.1.6",
+    "@testing-library/jest-dom": "6.6.3",
+    "@testing-library/react": "16.1.0",
+    "@types/node": "22.10.2",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "@vitejs/plugin-react": "4.3.4",
+    "fake-indexeddb": "6.0.0",
+    "jsdom": "25.0.1",
+    "openapi-typescript": "7.5.2",
+    "size-limit": "11.1.6",
+    "typescript": "5.7.2",
+    "vite": "6.0.7",
+    "vite-plugin-pwa": "0.21.1",
+    "vitest": "3.0.5",
+    "workbox-precaching": "7.3.0",
+    "workbox-routing": "7.3.0",
+    "workbox-window": "7.3.0"
+  }
+}

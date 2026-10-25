@@ -1,0 +1,49 @@
+import { QueryClient } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import { App } from './App'
+import {
+  PERSIST_BUSTER, PERSIST_MAX_AGE, persister, refreshMeOnReconnect, shouldDehydrate, watchSignedInUser,
+} from './api/persistence'
+import './styles/tokens.css'
+import './styles/app.css'
+import './styles/theme.css'
+import { captureInstallPrompt } from './pwa/install'
+import { registerServiceWorker } from './pwa/register'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      // Stored data renders at once, then anything older than this revalidates
+      // when the app opens, regains focus or the connection returns.
+      staleTime: 30_000,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      // Serve cached data while offline instead of showing an error.
+      networkMode: 'offlineFirst',
+      // Must outlive the persisted maxAge or restored queries are collected.
+      gcTime: PERSIST_MAX_AGE,
+    },
+  },
+})
+watchSignedInUser(queryClient)
+refreshMeOnReconnect(queryClient)
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister, maxAge: PERSIST_MAX_AGE, buster: PERSIST_BUSTER, dehydrateOptions: { shouldDehydrateQuery: shouldDehydrate } }}
+    >
+      <BrowserRouter basename="/app">
+        <App />
+      </BrowserRouter>
+    </PersistQueryClientProvider>
+  </StrictMode>,
+)
+
+captureInstallPrompt()
+registerServiceWorker()
