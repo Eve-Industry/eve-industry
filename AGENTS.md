@@ -112,6 +112,7 @@ Passive, flag-gated capture of ESI traffic (`app/Services/Esi/Diagnostics`), buf
 5. Bulk writes use chunked `upsert()`. `upsert()` bypasses Eloquent casts, so `json_encode` JSON columns first.
 6. Schema changes are new dated migrations; never edit existing ones.
 7. Work on a branch and merge to `master` by pull request.
+8. Do not add AI attribution (no `Co-Authored-By: Claude`, no "Generated with Claude Code") to commit messages or PR descriptions.
 
 ## Open-source release additions
 
