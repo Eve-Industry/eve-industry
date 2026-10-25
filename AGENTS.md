@@ -4,9 +4,9 @@ Guide for engineers and AI agents working on Eve Industrialist. Read this before
 
 ## What this is
 
-A Laravel 11 monolith for EVE Online industrialists. Players sign in with EVE SSO, link characters, and use planning and tracking tools built on their ESI data plus public market data: manufacturing, reaction and invention calculators, build programs, assets, blueprints, planetary industry, market trading, contract appraisal, a wormhole mapper, moon scans and corporation tools (donations, projects, ESS tracker, structure timers). Admins log in with email/password and manage users, sponsors, settings and a Discord welcome bot.
+A Laravel 12 monolith for EVE Online industrialists. Players sign in with EVE SSO, link characters, and use planning and tracking tools built on their ESI data plus public market data: manufacturing, reaction and invention calculators, build programs, assets, blueprints, planetary industry, market trading, contract appraisal, a wormhole mapper, moon scans and corporation tools (donations, projects, ESS tracker, structure timers). Admins log in with email/password and manage users, sponsors, settings and a Discord welcome bot.
 
-Stack: PHP 8.2+, Laravel 11, MySQL 8, Redis (cache, sessions, queues), Laravel Horizon, Socialite with the EVE Online provider. Server-rendered Blade views, being replaced page by page by a React app in `frontend/` (Vite, TypeScript) served at `/app` (see `docs/phase-d.md`).
+Stack: PHP 8.2+, Laravel 12, MySQL 8, Redis (cache, sessions, queues), Laravel Horizon, Socialite with the EVE Online provider. Server-rendered Blade views, being replaced page by page by a React app in `frontend/` (Vite, TypeScript) served at `/app` (see `docs/phase-d.md`).
 
 `README.md` is accurate for setup but describes only the original login system. The other root `*.md` files (`IMPLEMENTATION_SUMMARY.md`, `PR_CHANGES.md`, `LAYOUT_GUIDE.md`, etc.) are old PR notes, not current docs.
 
