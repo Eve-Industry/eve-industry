@@ -13,7 +13,14 @@ set -euo pipefail
 
 RAW_URL="${EVE_RAW_URL:-https://raw.githubusercontent.com/Eve-Industry/eve-industry/main/deploy}"
 INSTALL_DIR="${INSTALL_DIR:-$PWD/eve-industrialist}"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
+# Use sibling files only when this is a real file inside a deploy/ checkout. Piped
+# through `curl | bash` there is no script file, and the current directory must not
+# be trusted (it may hold an unrelated docker-compose.yml).
+SCRIPT_DIR=""
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+  _dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [ -f "$_dir/docker-compose.yml" ] && [ -f "$_dir/Caddyfile" ] && [ "$(basename "$_dir")" = "deploy" ]; then SCRIPT_DIR="$_dir"; fi
+fi
 
 say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 die() { printf '\033[31mError:\033[0m %s\n' "$*" >&2; exit 1; }
