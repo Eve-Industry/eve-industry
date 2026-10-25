@@ -19,6 +19,11 @@
 #
 # Provided as is, without warranty. See LICENSE (AGPL-3.0).
 
+# A fixed project name, so this stack never shares containers or volumes with another
+# Compose project that happens to live in a folder with the same name. To run a second
+# copy on the same machine, set COMPOSE_PROJECT_NAME in its .env.
+name: eve-industry
+
 x-app: &app
   image: ${EVE_IMAGE:-ghcr.io/eve-industry/eve-industry}:${EVE_VERSION:-latest}
   env_file: .env

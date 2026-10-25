@@ -107,3 +107,4 @@ volume (`/var/www/html/storage/logs`). Container output: `docker compose logs -f
 | Everything slow, ESI errors | The ESI error limit is per application; see the ESI docs under `docs/operations/` |
 | Lost admin password | `docker compose exec web php artisan admin:reset` (uses `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` from `.env`; set a strong password first) |
 | Moved servers | Restore a backup and keep the same `APP_KEY` |
+| Migrate fails with "Access denied", or other containers get replaced | Another Compose project shares this stack's project name or volumes (older compose files took the name from the install folder). The compose file now fixes the name to `eve-industry`. Never run `docker compose down -v` while unsure which volumes are attached. To run two copies on one machine, give each its own `COMPOSE_PROJECT_NAME` in `.env`. |
