@@ -5,6 +5,13 @@ All notable changes are listed here. Format based on
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-10-25
+
+### Changed
+- Release images: amd64 and arm64 are now built natively in parallel on their own runners and
+  merged into one multi-architecture tag, instead of building arm64 under emulation. The published
+  image is unchanged; releases are much faster.
+
 ## [1.0.1] - 2026-10-25
 
 ### Added
