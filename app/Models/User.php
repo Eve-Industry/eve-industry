@@ -58,6 +58,11 @@ class User extends Authenticatable
         return $this->hasMany(StationConfig::class);
     }
 
+    public function fittings(): HasMany
+    {
+        return $this->hasMany(Fitting::class);
+    }
+
     public function reactionPlans(): HasMany
     {
         return $this->hasMany(ReactionPlan::class);

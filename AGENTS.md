@@ -35,6 +35,7 @@ Request flow: route → controller → service → MySQL / Redis cache / externa
 | Dashboard | `IndustryService`, `PlanetaryService` (reads cache warmed by `dashboard:refresh`) |
 | Calculators | `ManufacturingCalculatorService`, `ReactionsCalculatorService`, `InventionPlannerService`, `ManufacturingBrowserService` (reads `manufacturing_costs`), `MarketService` |
 | Build programs | `CorporationBuildProgramService`, `AssetService`, calculators |
+| Fittings | `EftParser`, `FittingImporter`, `FittingPlanner`, `FittingProgramService` (personal assets only), `CorporationFittingProgramService` (corporation assets only; same access rules as corporate build programs) |
 | Industry | `IndustryService`, `ProductionService`, `ReprocessingService`, `IndustryStockService` |
 | Assets | `AssetService`, `AbyssalService` |
 | Planetary | `PlanetaryService`, `FactoryPlanetPlannerService` |

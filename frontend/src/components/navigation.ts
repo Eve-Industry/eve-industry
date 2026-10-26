@@ -40,6 +40,8 @@ export const navigationGroups: NavigationGroup[] = [
     { label: 'Manufacturing Browser', to: '/calculators/manufacturing-browser' },
     { label: 'My Structures', to: '/structures' },
     { label: 'Build Programs', to: '/build-programs' },
+    { label: 'My Fittings', to: '/fittings' },
+    { label: 'Fitting Program', to: '/fitting-program' },
   ] },
   { id: 'planetary', label: 'Planetary', links: [
     { label: 'PI Dashboard', to: '/planetary' },
@@ -61,6 +63,8 @@ export const navigationGroups: NavigationGroup[] = [
     { label: 'Projects', to: '/corporate/projects' },
     { label: 'Project Contributors', to: '/corporate/projects/contributors' },
     { label: 'Corp Build Programs', to: '/corporate/build-programs' },
+    { label: 'Corp Fittings', to: '/corporate/fittings' },
+    { label: 'Corp Fitting Program', to: '/corporate/fitting-program' },
     { label: 'ESS Tracker', to: '/corporate/ess-tracker' },
     { label: 'Structure Timers', to: '/corporate/structure-vulnerability' },
   ] },

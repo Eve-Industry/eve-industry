@@ -126,6 +126,39 @@ trait UsesAssetSnapshots
             ->groupBy('type_id')->get()->toArray();
     }
 
+    /**
+     * Quantity held per type in the user's personal assets only (never the
+     * corporation's), as {type_id: quantity}. Items fitted into a ship's slots
+     * are not stock and are left out. With location ids, only items whose root
+     * station or structure is one of them count.
+     *
+     * @param  list<int>  $typeIds
+     * @param  list<int>  $locationIds
+     * @return array{0: array<int, int>, 1: array<string, mixed>} quantities and snapshot metadata
+     */
+    public function personalTypeQuantities(int $userId, array $typeIds, array $locationIds = []): array
+    {
+        [$snapshots, $keys] = $this->snapshotContext($userId, 'personal');
+        $this->queueMissingSnapshots($userId, $snapshots->count(), count($keys));
+        $store = app(AssetSnapshotStore::class);
+
+        $query = $store->items($snapshots)->whereIn('type_id', $typeIds)
+            ->where(function (Builder $q) {
+                $q->whereNull('payload->location_flag')
+                    ->orWhereNotIn('payload->location_flag', \App\Services\Fittings\FittedSlots::FLAGS);
+            });
+        if ($locationIds !== []) {
+            $query->whereIn('root_location_id', $locationIds);
+        }
+
+        $quantities = [];
+        foreach ($query->selectRaw('type_id, SUM(quantity) AS quantity')->groupBy('type_id')->get() as $row) {
+            $quantities[(int) $row->type_id] = (int) $row->quantity;
+        }
+
+        return [$quantities, $store->metadata($snapshots, count($keys))];
+    }
+
     private function snapshotShipAssets(int $userId): array
     {
         [$snapshots, $keys] = $this->snapshotContext($userId);
