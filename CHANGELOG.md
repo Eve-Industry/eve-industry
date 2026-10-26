@@ -5,6 +5,11 @@ All notable changes are listed here. Format based on
 
 ## [Unreleased]
 
+### Changed
+- The Discord welcome bot is hidden while it is a work in progress: no Admin → Discord Bot page,
+  its `/api/v1/admin/discord-bot` endpoints return 404 and `php artisan discord:bot` exits.
+  Developers can turn it back on with `discord_bot` in `config/features.php` (no env variable).
+
 ## [1.0.2] - 2026-10-25
 
 ### Changed

@@ -4953,6 +4953,10 @@ export interface components {
             source_url: string;
             /** @description Optional community invite link. */
             discord_url: string | null;
+            features: {
+                /** @description Discord welcome bot admin page (work in progress, off by default). */
+                discord_bot: boolean;
+            };
             characters: components["schemas"]["CharacterResource"][];
         };
         /**

@@ -10,10 +10,16 @@ class DiscordBot extends Command
 {
     protected $signature = 'discord:bot';
 
-    protected $description = 'Start the Discord welcome bot (connects to the Discord Gateway and sends welcome messages)';
+    protected $description = 'Start the Discord welcome bot (work in progress; off unless config/features.php enables it)';
 
     public function handle(): int
     {
+        if (! config('features.discord_bot')) {
+            $this->error('The Discord welcome bot is a work in progress and is turned off in this build (config/features.php).');
+
+            return self::FAILURE;
+        }
+
         $settings = DiscordBotSetting::getSettings();
 
         if (! $settings->is_enabled) {

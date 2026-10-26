@@ -34,6 +34,10 @@ class MeResource extends JsonResource
             'source_url' => (string) config('app.source_url'),
             /** @var string|null Optional community invite link. */
             'discord_url' => config('app.discord_url') ?: null,
+            'features' => [
+                /** Discord welcome bot admin page (work in progress, off by default). */
+                'discord_bot' => (bool) config('features.discord_bot'),
+            ],
             'characters' => CharacterResource::collection($this->characters),
         ];
     }

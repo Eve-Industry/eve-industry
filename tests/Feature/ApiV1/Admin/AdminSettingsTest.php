@@ -130,6 +130,7 @@ class AdminSettingsTest extends TestCase
 
     public function test_discord_bot_never_returns_the_token_and_keeps_it_when_left_out(): void
     {
+        config()->set('features.discord_bot', true);
         $admin = $this->admin();
 
         $this->actingAs($admin)->putJson('/api/v1/admin/discord-bot', $this->bot(['bot_token' => 'secret-token']))
@@ -153,6 +154,7 @@ class AdminSettingsTest extends TestCase
 
     public function test_discord_bot_validation(): void
     {
+        config()->set('features.discord_bot', true);
         $admin = $this->admin();
 
         foreach ([

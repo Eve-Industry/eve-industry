@@ -97,7 +97,7 @@ volume (`/var/www/html/storage/logs`). Container output: `docker compose logs -f
 
 * **Push notifications:** `docker compose exec worker php artisan notifications:vapid-keys`, put the keys and
   `WEBPUSH_VAPID_SUBJECT=mailto:you@example.com` in `.env`, then `docker compose up -d`.
-* **Discord welcome bot:** configure in Admin → Discord Bot.
+* **Discord welcome bot:** work in progress and switched off in this release.
 * **Look and feel:** [styling.md](../styling.md).
 * **Community link:** `DISCORD_INVITE_URL`.
 * **ESI diagnostics:** [docs/operations/esi-diagnostics.md](../operations/esi-diagnostics.md).
