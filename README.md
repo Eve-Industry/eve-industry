@@ -63,7 +63,7 @@ Tests: `php artisan test` (SQLite in memory, no MySQL or Redis needed) and `npm 
 [`frontend/`](frontend/). Start with [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md)
 (architecture, services, scheduled tasks, queues).
 
-Stack: Laravel 12, PHP 8.3, MySQL 8, Redis, Horizon; React 19 + TypeScript (Vite) served at `/app`.
+Stack: Laravel 12, PHP 8.5, MySQL 8, Redis, Horizon; React 19 + TypeScript (Vite) served at `/app`.
 
 ## Security
 
