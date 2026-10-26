@@ -76,6 +76,8 @@ services:
       <<: *app-env
       APP_ROLE: worker
     restart: unless-stopped
+    # The image's SIGQUIT (for nginx) is ignored by Horizon, which only handles SIGTERM.
+    stop_signal: SIGTERM
     stop_grace_period: 330s  # let Horizon finish a job (longest market timeout 300 s)
     depends_on:
       <<: *app-depends
@@ -89,6 +91,10 @@ services:
       <<: *app-env
       APP_ROLE: scheduler
     restart: unless-stopped
+    # schedule:work has no signal handler, and PID 1 ignores unhandled signals, so run
+    # it under an init that delivers SIGTERM and lets it exit at once.
+    init: true
+    stop_signal: SIGTERM
     depends_on:
       <<: *app-depends
       migrate:
