@@ -58,7 +58,7 @@ cd "$INSTALL_DIR"
 fetch() { # fetch FILE
   if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/$1" ]; then cp "$SCRIPT_DIR/$1" "$1"; else curl -fsSL "$RAW_URL/$1" -o "$1"; fi
 }
-for f in docker-compose.yml docker-compose.no-proxy.yml Caddyfile .env.example update.sh backup.sh restore.sh; do fetch "$f"; done
+for f in docker-compose.yml docker-compose.no-proxy.yml Caddyfile .env.example update.sh update.ps1 backup.sh restore.sh; do fetch "$f"; done
 chmod +x update.sh backup.sh restore.sh
 
 if [ -f .env ]; then

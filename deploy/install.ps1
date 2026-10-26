@@ -47,7 +47,7 @@ New-Item -ItemType Directory -Force -Path (Join-Path $InstallDir 'themes') | Out
 Set-Location $InstallDir
 
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { $null }
-foreach ($f in 'docker-compose.yml', 'docker-compose.no-proxy.yml', 'Caddyfile', '.env.example', 'update.sh', 'backup.sh', 'restore.sh') {
+foreach ($f in 'docker-compose.yml', 'docker-compose.no-proxy.yml', 'Caddyfile', '.env.example', 'update.sh', 'update.ps1', 'backup.sh', 'restore.sh') {
     if ($scriptDir -and (Test-Path (Join-Path $scriptDir $f))) { Copy-Item (Join-Path $scriptDir $f) $f -Force }
     else { Invoke-WebRequest "$RawUrl/$f" -OutFile $f }
 }
@@ -149,3 +149,4 @@ Write-Host "Admin: $appUrlNow/admin/login"
 if ($password) { Write-Host "Password (shown once, change it after signing in): $password" }
 Write-Host 'Game data (items, prices) imports in the background and can take a while.'
 Write-Host "Progress: Invoke-RestMethod $appUrlNow/api/v1/health"
+Write-Host 'Update later with .\update.ps1'

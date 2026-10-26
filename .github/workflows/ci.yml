@@ -146,6 +146,17 @@ jobs:
           docker compose ps
           docker compose ps web --format '{{.Health}}' | grep -q healthy
 
+      - name: Update the running stack
+        # Serves deploy/ locally so update.sh refreshes the stack files from this commit.
+        working-directory: deploy
+        run: |
+          mkdir -p "$RUNNER_TEMP/files"
+          cp docker-compose.yml docker-compose.no-proxy.yml Caddyfile .env.example update.sh update.ps1 backup.sh restore.sh "$RUNNER_TEMP/files/"
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory "$RUNNER_TEMP/files" >/dev/null 2>&1 &
+          sleep 1
+          EVE_RAW_URL=http://127.0.0.1:8765 EVE_SKIP_PULL=1 bash update.sh
+          test -f .previous/docker-compose.yml
+
       - name: Smoke test
         run: docker/smoke-test.sh http://127.0.0.1:8080
 

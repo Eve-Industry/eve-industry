@@ -72,11 +72,32 @@ must be running; if you stop them the data stops updating.
 ## Updating
 
 ```bash
-./update.sh          # docker compose pull && up -d; migrations run automatically
+./update.sh                    # Linux / macOS / WSL
+./update.sh --backup           # run ./backup.sh first
+./update.sh --version 1.2.3    # switch EVE_VERSION in .env, then update
 ```
 
-Pin a release with `EVE_VERSION=v1.2.3` in `.env` instead of `latest`. Read the changelog before
-major upgrades and take a backup first.
+```powershell
+.\update.ps1                   # Windows; -Version 1.2.3 to switch versions
+powershell -ExecutionPolicy Bypass -File .\update.ps1   # if scripts are blocked
+```
+
+The updater refreshes every file the installer put next to `.env` (both compose files, `Caddyfile`,
+`.env.example` and the helper scripts), pulls every image (app, Caddy, MySQL, Redis), restarts the
+stack and waits until `web` is healthy. Migrations run automatically. Details:
+
+* `.env` is never replaced. Settings that are new in `.env.example` are listed so you can add them.
+* The compose files, `Caddyfile` and `.env.example` come from the release tag when `EVE_VERSION` is an
+  exact version (`1.2.3`), otherwise from `main`. The helper scripts always come from `main`.
+  `EVE_RAW_URL` points both somewhere else (a fork, a mirror).
+* The previous files are kept in `.previous/`. If the new compose file does not accept your `.env`
+  (for example a new REQUIRED setting), the old files are put back and nothing restarts.
+* An install from before the project name was fixed keeps its old name (`COMPOSE_PROJECT_NAME` is added
+  to `.env`), so the update does not start a second, empty stack.
+* `--skip-files` / `-SkipFiles` only pulls images and restarts, for hand-edited compose files.
+
+Pin a release with `EVE_VERSION=1.2.3` in `.env` instead of `latest` (image tags have no `v`). Read the
+changelog before major upgrades and take a backup first.
 
 ## Backups
 
