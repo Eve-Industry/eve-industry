@@ -5,6 +5,11 @@ All notable changes are listed here. Format based on
 
 ## [Unreleased]
 
+### Fixed
+- Installer (both scripts): with no `.env` but a database volume left by an earlier install, it now
+  stops with a clear message instead of writing new passwords the old database rejects (which made
+  `migrate` fail with "Access denied").
+
 ## [1.0.2] - 2026-10-25
 
 ### Changed
