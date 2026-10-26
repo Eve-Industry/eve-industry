@@ -17,6 +17,11 @@ All notable changes are listed here. Format based on
   (`-Version`, `-SkipFiles`).
 - Installs from before the fixed project name keep their old name on update.
 
+### Changed
+- The Discord welcome bot is hidden while it is a work in progress: no Admin → Discord Bot page,
+  its `/api/v1/admin/discord-bot` endpoints return 404 and `php artisan discord:bot` exits.
+  Developers can turn it back on with `discord_bot` in `config/features.php` (no env variable).
+
 ### Fixed
 - Compose: stopping, updating or recreating the stack no longer hangs for five and a half minutes
   on the worker. The image's stop signal (SIGQUIT, for nginx) was ignored by Horizon, so Docker

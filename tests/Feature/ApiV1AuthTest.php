@@ -77,6 +77,7 @@ class ApiV1AuthTest extends TestCase
                     'demo' => false,
                     'source_url' => config('app.source_url'),
                     'discord_url' => null,
+                    'features' => ['discord_bot' => false],
                     'characters' => [
                         [
                             'character_id' => 2002,

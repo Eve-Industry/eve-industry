@@ -100,7 +100,6 @@ class SponsorTest extends TestCase
         $this->actingAs($admin)->get(route('admin.users'))->assertRedirect('/app/admin/users');
         $this->actingAs($admin)->get(route('admin.users.industry-jobs', $admin))->assertRedirect("/app/admin/users/{$admin->id}/industry-jobs");
         $this->actingAs($admin)->get(route('admin.settings'))->assertRedirect('/app/admin/settings');
-        $this->actingAs($admin)->get(route('admin.discord-bot'))->assertRedirect('/app/admin/discord-bot');
     }
 
     public function test_old_admin_urls_still_turn_non_admins_away(): void

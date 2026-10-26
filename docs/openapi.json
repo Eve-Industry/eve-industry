@@ -20894,6 +20894,18 @@
                         ],
                         "description": "Optional community invite link."
                     },
+                    "features": {
+                        "type": "object",
+                        "properties": {
+                            "discord_bot": {
+                                "type": "boolean",
+                                "description": "Discord welcome bot admin page (work in progress, off by default)."
+                            }
+                        },
+                        "required": [
+                            "discord_bot"
+                        ]
+                    },
                     "characters": {
                         "type": "array",
                         "items": {
@@ -20911,6 +20923,7 @@
                     "demo",
                     "source_url",
                     "discord_url",
+                    "features",
                     "characters"
                 ],
                 "title": "MeResource"

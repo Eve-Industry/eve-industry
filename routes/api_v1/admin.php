@@ -43,6 +43,9 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         Route::get('/health', [EsiDiagnosticsController::class, 'health'])->name('health');
     });
 
-    Route::get('/discord-bot', [DiscordBotController::class, 'show'])->name('discord-bot.show');
-    Route::put('/discord-bot', [DiscordBotController::class, 'update'])->name('discord-bot.update');
+    // Work in progress: 404 unless config('features.discord_bot') is on.
+    Route::middleware('feature:discord_bot')->group(function () {
+        Route::get('/discord-bot', [DiscordBotController::class, 'show'])->name('discord-bot.show');
+        Route::put('/discord-bot', [DiscordBotController::class, 'update'])->name('discord-bot.update');
+    });
 });
