@@ -5,6 +5,18 @@ All notable changes are listed here. Format based on
 
 ## [Unreleased]
 
+### Added
+- `update.ps1`: updater for Windows (Docker Desktop), installed next to `update.sh`.
+
+### Changed
+- `update.sh` and `update.ps1` now update every part of an install: both compose files, the
+  `Caddyfile` and `.env.example` (from the release tag when `EVE_VERSION` is pinned), the helper
+  scripts (always from `main`), then all images, and wait for the app to become healthy. `.env` is
+  never replaced; new settings are listed, the previous files are kept in `.previous/` and restored
+  if the new compose file rejects `.env`. Options: `--version`, `--backup`, `--skip-files`
+  (`-Version`, `-SkipFiles`).
+- Installs from before the fixed project name keep their old name on update.
+
 ### Changed
 - The Discord welcome bot is hidden while it is a work in progress: no Admin → Discord Bot page,
   its `/api/v1/admin/discord-bot` endpoints return 404 and `php artisan discord:bot` exits.
@@ -18,6 +30,7 @@ All notable changes are listed here. Format based on
 - Installer (both scripts): with no `.env` but a database volume left by an earlier install, it now
   stops with a clear message instead of writing new passwords the old database rejects (which made
   `migrate` fail with "Access denied").
+- Docs and `.env.example` showed version pins as `v1.2.3`; image tags have no `v` (`1.2.3`).
 
 ## [1.0.2] - 2026-10-25
 

@@ -157,6 +157,10 @@ jobs:
           files: |
             deploy/install.sh
             deploy/install.ps1
+            deploy/update.sh
+            deploy/update.ps1
+            deploy/backup.sh
+            deploy/restore.sh
             deploy/docker-compose.yml
             deploy/docker-compose.no-proxy.yml
             deploy/Caddyfile
