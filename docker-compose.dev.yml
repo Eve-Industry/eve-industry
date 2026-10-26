@@ -71,6 +71,8 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     command: php artisan horizon
+    # php-fpm's SIGQUIT is ignored by Horizon, which only handles SIGTERM.
+    stop_signal: SIGTERM
     volumes:
       - ./:/var/www
     networks:
@@ -89,6 +91,9 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     command: php artisan schedule:work
+    # No signal handler in schedule:work; an init lets SIGTERM stop it at once.
+    init: true
+    stop_signal: SIGTERM
     volumes:
       - ./:/var/www
     networks:

@@ -55,7 +55,18 @@ foreach ($f in 'docker-compose.yml', 'docker-compose.no-proxy.yml', 'Caddyfile',
 if (Test-Path .env) {
     Write-Host '.env already exists, keeping it.'
 } else {
-    $domain = if ($env:DOMAIN) { $env:DOMAIN } else { Read-Required "Public domain name (or 'localhost' to try it locally)" 'localhost' }
+    # MySQL sets its passwords only when it first creates its volume, so a new .env
+    # (with new passwords) cannot work against data left by an earlier install.
+    $project = if ($env:COMPOSE_PROJECT_NAME) { $env:COMPOSE_PROJECT_NAME } else { 'eve-industry' }
+    $dbVolume = "${project}_mysql-data"
+    if (docker volume ls -q --filter "name=^$dbVolume$") {
+        throw ("There is no .env in $InstallDir, but the database volume $dbVolume from an earlier install still exists.`n" +
+            "A new .env would have new passwords that this database rejects. Either:`n" +
+            "  - keep that data: put the earlier .env back in $InstallDir and run this installer again, or`n" +
+            "  - delete it (all data from the earlier install is lost): run 'docker compose down -v' in $InstallDir, then run this installer again.")
+    }
+
+    $domain =if ($env:DOMAIN) { $env:DOMAIN } else { Read-Required "Public domain name (or 'localhost' to try it locally)" 'localhost' }
     $proxy = if ($env:PROXY) { $env:PROXY } else { 'caddy' }
 
     # The port people connect to. Selectable for localhost and when you bring your own

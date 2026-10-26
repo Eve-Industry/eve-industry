@@ -10,6 +10,15 @@ All notable changes are listed here. Format based on
   its `/api/v1/admin/discord-bot` endpoints return 404 and `php artisan discord:bot` exits.
   Developers can turn it back on with `discord_bot` in `config/features.php` (no env variable).
 
+### Fixed
+- Compose: stopping, updating or recreating the stack no longer hangs for five and a half minutes
+  on the worker. The image's stop signal (SIGQUIT, for nginx) was ignored by Horizon, so Docker
+  waited out the full grace period and then killed it. The worker now gets SIGTERM and shuts down
+  cleanly, and the scheduler stops at once instead of being killed after 10 seconds.
+- Installer (both scripts): with no `.env` but a database volume left by an earlier install, it now
+  stops with a clear message instead of writing new passwords the old database rejects (which made
+  `migrate` fail with "Access denied").
+
 ## [1.0.2] - 2026-10-25
 
 ### Changed
