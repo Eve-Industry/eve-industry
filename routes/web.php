@@ -124,5 +124,5 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::redirect('/sponsors/create', '/app/admin/sponsors/new')->name('sponsors.create');
     Route::get('/sponsors/{sponsor}/edit', fn ($sponsor) => redirect("/app/admin/sponsors/{$sponsor}"))->name('sponsors.edit');
     Route::redirect('/settings', '/app/admin/settings')->name('settings');
-    Route::redirect('/discord-bot', '/app/admin/discord-bot')->name('discord-bot');
+    Route::redirect('/discord-bot', '/app/admin/discord-bot')->middleware('feature:discord_bot')->name('discord-bot');
 });

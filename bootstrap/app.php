@@ -35,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'super-admin' => \App\Http\Middleware\SuperAdminMiddleware::class,
             'stock-manager' => \App\Http\Middleware\StockManagerEnabled::class,
             'demo-guard' => \App\Http\Middleware\BlockDemoUser::class,
+            'feature' => \App\Http\Middleware\EnsureFeatureEnabled::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) use ($isVersionedApi) {

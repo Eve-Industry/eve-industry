@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { ApiError } from '../../api/client'
 import { errorMessage, fieldError, useDiscordBot, useUpdateDiscordBot } from '../../api/admin'
+import { useMe } from '../../api/queries'
 import type { components } from '../../api/schema'
 import { AdminError } from '../../components/AdminGuard'
 
@@ -139,14 +140,24 @@ function BotForm({ settings }: { settings: Settings }) {
   )
 }
 
-export default function AdminDiscordBot() {
+function BotSettings() {
   const bot = useDiscordBot()
   return (
     <>
       <div className="page-head">
-        <h1>Discord bot settings</h1>
+        <h1>Discord bot settings <span className="badge badge-stale">Work in progress</span></h1>
       </div>
+      <p className="muted">The welcome bot is unfinished and may change or be removed.</p>
       {bot.isPending ? <p>Loading…</p> : bot.isError ? <AdminError error={bot.error} what="the bot settings" /> : <BotForm settings={bot.data.data} />}
     </>
   )
+}
+
+/** Work in progress: hidden (and its API 404s) unless config/features.php turns it on. */
+export default function AdminDiscordBot() {
+  const me = useMe()
+  if (me.isPending) return <p>Loading…</p>
+  if (me.isError) return <p role="alert">Could not check your account.</p>
+  if (!me.data.data.features?.discord_bot) return <p>Page not found.</p>
+  return <BotSettings />
 }

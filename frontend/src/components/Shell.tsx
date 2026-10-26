@@ -79,7 +79,7 @@ export function Shell() {
                   <span>{group.label}</span><span className="nav-chevron" aria-hidden="true">⌄</span>
                 </button>
                 <div id={`nav-${group.id}`} className="nav-submenu" hidden={!expanded}>
-                  {group.links.filter((link) => !link.stockManager || me.data?.data.stock_manager).map((link) => (
+                  {group.links.filter((link) => (!link.stockManager || me.data?.data.stock_manager) && (!link.feature || me.data?.data.features?.[link.feature])).map((link) => (
                     <NavLink key={link.to} to={link.to} end={group.links.some((other) => other.to !== link.to && other.to.startsWith(`${link.to}/`)) || link.to === '/'}>{link.label}</NavLink>
                   ))}
                 </div>

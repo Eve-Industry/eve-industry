@@ -41,7 +41,7 @@ Request flow: route → controller → service → MySQL / Redis cache / externa
 | Market and contracts | `MarketTradingService`, `MarketBrowserService`, `ContractAppraisalService` |
 | Corporation | `CorporateDonationService`, `CorporationProjectsService`, `MoonScanService`, `EsiService` |
 | Wormholes | `EsiService` |
-| Admin | `DiscordBotService` |
+| Admin | `DiscordBotService` (Discord welcome bot, work in progress: off via `config/features.php`) |
 | Install and themes | `SetupStatusService`, `ThemeService`, command `app:install` |
 
 Market prices for calculators come from `MarketService::getSellPrices()`: a 5th-percentile average of sell orders, read from `market_aggregates` (the region's last complete order sweep, cached per sweep) or from raw `market_orders` for a region never swept, falling back to `market_prices`. Region order sweeps are run by `MarketOrderSweepService` (see `docs/phase-c.md`). The five trade regions are in `MarketTradingService::REGIONS` (Jita, Amarr, Dodixie, Rens, Hek).
@@ -52,7 +52,7 @@ Market prices for calculators come from `MarketService::getSellPrices()`: a 5th-
 - CCP SDE JSONL zip (`developers.eveonline.com`): static data, via `SdeImportService`.
 - Fuzzwork blueprint API: blueprint/reaction activities.
 - everef.net: daily market history CSVs and public contract snapshots.
-- Discord gateway: welcome bot.
+- Discord gateway: welcome bot (work in progress, hidden by default).
 
 ## Scheduled tasks
 
@@ -90,7 +90,7 @@ Defined in `routes/console.php`. Times are UTC. Every entry uses `withoutOverlap
 - Sessions use the non-evicting Redis through the `sessions` connection (database 2 by default). See `docs/operations/esi-scaling.md` for rollout and encryption requirements.
 - ESI-calling jobs check `EsiService::isEsiErrorLimited()` and release themselves until the error window resets.
 - Horizon dashboard: `/horizon`, admin users only (`HorizonServiceProvider`).
-- Long-running processes: `php artisan horizon` and `php artisan discord:bot` (exits unless enabled in Admin → Discord Bot; no daemon for it is defined in the repo).
+- Long-running processes: `php artisan horizon` and `php artisan discord:bot` (work in progress: exits unless `features.discord_bot` is set to `true` in `config/features.php`, which has no env var, and then unless enabled in Admin → Discord Bot; no daemon for it is defined in the repo).
 
 ## ESI diagnostics
 
