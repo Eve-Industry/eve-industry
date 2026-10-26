@@ -5,6 +5,8 @@ All notable changes are listed here. Format based on
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-10-26
+
 ### Added
 - `update.ps1`: updater for Windows (Docker Desktop), installed next to `update.sh`.
 
@@ -16,8 +18,6 @@ All notable changes are listed here. Format based on
   if the new compose file rejects `.env`. Options: `--version`, `--backup`, `--skip-files`
   (`-Version`, `-SkipFiles`).
 - Installs from before the fixed project name keep their old name on update.
-
-### Changed
 - The Discord welcome bot is hidden while it is a work in progress: no Admin → Discord Bot page,
   its `/api/v1/admin/discord-bot` endpoints return 404 and `php artisan discord:bot` exits.
   Developers can turn it back on with `discord_bot` in `config/features.php` (no env variable).
