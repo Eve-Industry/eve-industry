@@ -16,6 +16,10 @@ return [
             'prefix' => '',
             'strict' => true,
             'engine' => null,
+            // Managed MySQL (DigitalOcean, RDS, ...) requires TLS: point this at the provider's CA certificate.
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
         ],
     ],
     'migrations' => 'migrations',
@@ -29,13 +33,17 @@ return [
     'redis' => [
         'client' => env('REDIS_CLIENT', 'phpredis'),
         'default' => [
+            'scheme' => env('REDIS_SCHEME'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
+            'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => (int) env('REDIS_DB', 0),
         ],
         'cache' => [
+            'scheme' => env('REDIS_CACHE_SCHEME', env('REDIS_SCHEME')),
             'host' => env('REDIS_CACHE_HOST', env('REDIS_HOST', '127.0.0.1')),
+            'username' => env('REDIS_CACHE_USERNAME', env('REDIS_USERNAME')),
             'password' => env('REDIS_CACHE_PASSWORD', env('REDIS_PASSWORD')),
             'port' => env('REDIS_CACHE_PORT', env('REDIS_PORT', '6379')),
             'database' => (int) env('REDIS_CACHE_DB', 1),
@@ -43,7 +51,9 @@ return [
         // Sessions must not compete with bulk inventory payloads for LRU space.
         // Defaults to the persisted, non-evicting Redis, in a separate database.
         'sessions' => [
+            'scheme' => env('REDIS_SESSION_SCHEME', env('REDIS_SCHEME')),
             'host' => env('REDIS_SESSION_HOST', env('REDIS_HOST', '127.0.0.1')),
+            'username' => env('REDIS_SESSION_USERNAME', env('REDIS_USERNAME')),
             'password' => env('REDIS_SESSION_PASSWORD', env('REDIS_PASSWORD')),
             'port' => env('REDIS_SESSION_PORT', env('REDIS_PORT', '6379')),
             'database' => (int) env('REDIS_SESSION_DB', 2),

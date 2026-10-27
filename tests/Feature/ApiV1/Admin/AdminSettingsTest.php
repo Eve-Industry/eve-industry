@@ -68,6 +68,37 @@ class AdminSettingsTest extends TestCase
         $this->assertDatabaseMissing('sponsors', ['id' => $id]);
     }
 
+    public function test_sponsor_banners_go_to_the_configured_uploads_disk(): void
+    {
+        config(['filesystems.uploads' => 's3']);
+        Storage::fake('public');
+        Storage::fake('s3');
+        $admin = $this->admin();
+        // A 1x1 PNG, so the test does not need GD.
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+
+        $response = $this->actingAs($admin)->post('/api/v1/admin/sponsors', [
+            'name' => 'Bucket Sponsor',
+            'url' => 'https://bucket.example',
+            'image' => UploadedFile::fake()->createWithContent('banner.png', $png),
+        ], ['Accept' => 'application/json'])->assertCreated();
+
+        $sponsor = Sponsor::findOrFail($response->json('data.id'));
+        Storage::disk('s3')->assertExists($sponsor->image_path);
+        Storage::disk('public')->assertMissing($sponsor->image_path);
+        $response->assertJsonPath('data.image_url', Storage::disk('s3')->url($sponsor->image_path));
+
+        $this->actingAs($admin)->deleteJson("/api/v1/admin/sponsors/{$sponsor->id}")->assertNoContent();
+        Storage::disk('s3')->assertMissing($sponsor->image_path);
+    }
+
+    public function test_sponsor_banner_urls_default_to_the_public_disk(): void
+    {
+        $sponsor = new Sponsor(['image_path' => 'sponsors/a.png']);
+
+        $this->assertSame(rtrim(config('app.url'), '/').'/storage/sponsors/a.png', $sponsor->imageUrl());
+    }
+
     public function test_sponsor_store_validates(): void
     {
         $this->actingAs($this->admin())->postJson('/api/v1/admin/sponsors', [])
