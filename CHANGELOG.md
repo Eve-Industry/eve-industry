@@ -5,6 +5,20 @@ All notable changes are listed here. Format based on
 
 ## [Unreleased]
 
+### Added
+- Kubernetes: Helm chart in `deploy/helm/eve-industry` (web, worker, scheduler, migrate and install
+  Jobs, optional bundled MySQL and Redis, Ingress, autoscaling for web). App pods run non-root on a
+  read-only root filesystem and log to the container output. See `docs/self-hosting/kubernetes.md`.
+- Image: `APP_ROLE=await-migrations` waits until the database has no pending migrations (the
+  chart's init container).
+
+### Fixed
+- Kubernetes: the worker and scheduler stop cleanly. Kubernetes sends the image's stop signal
+  (SIGQUIT, for nginx), which Horizon ignored and `schedule:work` never received, so pods waited
+  out their whole grace period (5.5 minutes for the worker) and were then killed. Both now run off
+  PID 1 and get SIGTERM on any stop signal, with or without Compose's `init: true`.
+- Containers recreate the `storage/` directories they need, so an empty volume works.
+
 ## [1.0.3] - 2026-10-26
 
 ### Added

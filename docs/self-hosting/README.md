@@ -2,6 +2,8 @@
 
 This is provided as is, without warranty (AGPL-3.0). You run it, you are responsible for it.
 
+This guide covers Docker Compose. For a Kubernetes cluster, see [kubernetes.md](kubernetes.md).
+
 ## What you get
 
 `docker compose up -d` in the install folder starts:

@@ -103,6 +103,25 @@ jobs:
       - name: Scan history and tree for secrets
         run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest detect --source /repo --redact --verbose
 
+  helm:
+    # Lints the Kubernetes chart and checks the rendered manifests against the API schemas,
+    # with the bundled data stores and with external ones (deploy/helm/eve-industry/ci/).
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Lint and validate
+        working-directory: deploy/helm
+        run: |
+          helm() { docker run --rm -v "$PWD:/charts" -w /charts alpine/helm:3.19.0 "$@"; }
+          for values in eve-industry/ci/*-values.yaml; do
+            helm lint eve-industry --strict -f "$values"
+            helm template ci eve-industry -f "$values" \
+              | docker run --rm -i ghcr.io/yannh/kubeconform:v0.7.0 -strict -summary -
+          done
+
   docker:
     # Builds the production image and boots the self-hosting stack from deploy/
     # to make sure a fresh install still comes up healthy.
