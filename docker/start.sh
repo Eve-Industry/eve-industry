@@ -11,8 +11,27 @@ set -e
 #              pre-deploy job); no long-running role ever migrates.
 #   install    `php artisan app:install`: first-run setup (admin account and
 #              game data import), then exits. Safe to run again.
+#   await-migrations
+#              waits until the database has no pending migrations, then
+#              exits. A Kubernetes init container, so pods start only after
+#              the migrate Job has finished.
 # The container runs as the unprivileged www-data user.
 APP_ROLE="${APP_ROLE:-web}"
+
+# storage/ may be an empty volume (a fresh named volume, a Kubernetes emptyDir):
+# recreate the directories Laravel writes to.
+mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions \
+    storage/framework/views storage/logs bootstrap/cache
+
+if [ "$APP_ROLE" = "await-migrations" ]; then
+    # --pending=1 exits 1 while migrations are pending; any other failure
+    # (database not up yet, no migrations table) also means keep waiting.
+    until php artisan migrate:status --pending=1 >/dev/null 2>&1; do
+        echo "Waiting for migrations..."
+        sleep 5
+    done
+    exit 0
+fi
 
 if [ "$APP_ROLE" = "migrate" ]; then
     exec php artisan migrate --force
@@ -33,17 +52,32 @@ php artisan event:cache || true
 # Make sure the public disk link exists (storage is a mounted volume).
 [ -e public/storage ] || php artisan storage:link || true
 
+# Runs a command off PID 1 and turns any stop signal into SIGTERM for it. The
+# image's stop signal is SIGQUIT (nginx's graceful stop), and Kubernetes sends
+# it too (containerd honours STOPSIGNAL), but Horizon ignores SIGQUIT and
+# schedule:work as PID 1 would ignore every signal it has no handler for.
+run_until_stopped() {
+    "$@" &
+    child=$!
+    trap 'kill -TERM "$child" 2>/dev/null || true' TERM INT QUIT
+    status=0
+    # wait returns early when a trapped signal arrives: wait again until it exits.
+    while kill -0 "$child" 2>/dev/null; do wait "$child" || status=$?; done
+    exit "$status"
+}
+
 case "$APP_ROLE" in
     web)
         ;;
     worker)
-        exec php artisan horizon
+        # Horizon stops taking jobs on SIGTERM and waits for running ones.
+        run_until_stopped php artisan horizon
         ;;
     scheduler)
-        exec php artisan schedule:work
+        run_until_stopped php artisan schedule:work
         ;;
     *)
-        echo "Unknown APP_ROLE '$APP_ROLE' (expected web, worker, scheduler, migrate or install)" >&2
+        echo "Unknown APP_ROLE '$APP_ROLE' (expected web, worker, scheduler, migrate, install or await-migrations)" >&2
         exit 1
         ;;
 esac

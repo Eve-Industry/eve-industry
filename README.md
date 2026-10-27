@@ -43,6 +43,8 @@ notifications, troubleshooting.
 
 Try it locally first with `DOMAIN=localhost` (no HTTPS).
 
+Running Kubernetes? There is a Helm chart: [docs/self-hosting/kubernetes.md](docs/self-hosting/kubernetes.md).
+
 ## Customise
 
 * Colours, fonts and layout tokens: switch looks with `APP_THEME` and write your own theme without

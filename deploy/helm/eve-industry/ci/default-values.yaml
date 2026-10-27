@@ -1,0 +1,10 @@
+# Minimal values for `helm lint` / `helm template` in CI (not real secrets).
+app:
+  url: https://eve.example.com
+  esiUserAgent: ci (ci@example.com)
+secrets:
+  appKey: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+  eveClientId: ci
+  eveClientSecret: ci
+  dbPassword: ci
+  dbRootPassword: ci
