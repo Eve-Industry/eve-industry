@@ -20,7 +20,7 @@ class SponsorResource extends JsonResource
             'id' => (int) $this->id,
             'name' => (string) $this->name,
             'url' => (string) $this->url,
-            'image_url' => asset('storage/'.$this->image_path),
+            'image_url' => $this->imageUrl(),
             'is_active' => (bool) $this->is_active,
             'sort_order' => (int) $this->sort_order,
         ];

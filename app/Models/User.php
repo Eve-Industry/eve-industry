@@ -43,6 +43,15 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * EVE SSO users have no password. SessionGuard compares this value to the
+     * remember-me cookie with hash_equals(), which throws a TypeError on null.
+     */
+    public function getAuthPassword(): string
+    {
+        return (string) $this->password;
+    }
+
     public function pushSubscriptions(): HasMany
     {
         return $this->hasMany(PushSubscription::class);

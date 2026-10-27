@@ -23,6 +23,13 @@ APP_ROLE="${APP_ROLE:-web}"
 mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions \
     storage/framework/views storage/logs bootstrap/cache
 
+# Platforms that hand over the database CA certificate as a value rather than a
+# file (DigitalOcean App Platform's ${db.CA_CERT}): write it out for PDO.
+if [ -n "${DB_CA_CERT:-}" ] && [ -z "${MYSQL_ATTR_SSL_CA:-}" ]; then
+    printf '%s\n' "$DB_CA_CERT" > /tmp/db-ca.crt
+    export MYSQL_ATTR_SSL_CA=/tmp/db-ca.crt
+fi
+
 if [ "$APP_ROLE" = "await-migrations" ]; then
     # --pending=1 exits 1 while migrations are pending; any other failure
     # (database not up yet, no migrations table) also means keep waiting.

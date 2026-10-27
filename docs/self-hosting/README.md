@@ -2,7 +2,10 @@
 
 This is provided as is, without warranty (AGPL-3.0). You run it, you are responsible for it.
 
-This guide covers Docker Compose. For a Kubernetes cluster, see [kubernetes.md](kubernetes.md).
+This guide covers Docker Compose. For a Kubernetes cluster, see [kubernetes.md](kubernetes.md). For a
+DigitalOcean Droplet with Managed MySQL (or any managed MySQL, through `docker-compose.managed-db.yml`),
+see [digitalocean.md](digitalocean.md); for DigitalOcean App Platform, see
+[digitalocean-app-platform.md](digitalocean-app-platform.md).
 
 ## What you get
 
@@ -120,6 +123,10 @@ volume (`/var/www/html/storage/logs`). Container output: `docker compose logs -f
 
 * **Push notifications:** `docker compose exec worker php artisan notifications:vapid-keys`, put the keys and
   `WEBPUSH_VAPID_SUBJECT=mailto:you@example.com` in `.env`, then `docker compose up -d`.
+* **Uploads in a bucket:** sponsor banners live in the `storage-data` volume unless you set
+  `UPLOADS_DISK=s3` and the `AWS_*` settings (any S3-compatible service: AWS S3, DigitalOcean Spaces,
+  Cloudflare R2, MinIO; see `.env.example`). Banners uploaded before the switch stay on the volume:
+  copy its `sponsors/` folder to the bucket, keeping the paths.
 * **Discord welcome bot:** work in progress and switched off in this release.
 * **Look and feel:** [styling.md](../styling.md).
 * **Community link:** `DISCORD_INVITE_URL`.

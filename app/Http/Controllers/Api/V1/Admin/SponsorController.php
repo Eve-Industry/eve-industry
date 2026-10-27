@@ -11,7 +11,6 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Sponsor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 
 class SponsorController extends Controller
 {
@@ -47,7 +46,7 @@ class SponsorController extends Controller
         $sponsor = Sponsor::create([
             'name' => $request->validated('name'),
             'url' => $request->validated('url'),
-            'image_path' => $request->file('image')->store('sponsors', 'public'),
+            'image_path' => $request->file('image')->store('sponsors', config('filesystems.uploads')),
             'is_active' => $request->boolean('is_active', true),
             'sort_order' => $request->validated('sort_order') ?? 0,
         ]);
@@ -70,8 +69,8 @@ class SponsorController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            Storage::disk('public')->delete($sponsor->image_path);
-            $data['image_path'] = $request->file('image')->store('sponsors', 'public');
+            Sponsor::imageDisk()->delete($sponsor->image_path);
+            $data['image_path'] = $request->file('image')->store('sponsors', config('filesystems.uploads'));
         }
 
         $sponsor->update($data);
@@ -84,7 +83,7 @@ class SponsorController extends Controller
      */
     public function destroy(NoInputRequest $request, Sponsor $sponsor): Response
     {
-        Storage::disk('public')->delete($sponsor->image_path);
+        Sponsor::imageDisk()->delete($sponsor->image_path);
         $sponsor->delete();
 
         return response()->noContent();

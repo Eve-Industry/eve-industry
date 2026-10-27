@@ -9,6 +9,14 @@ All notable changes are listed here. Format based on
 - Kubernetes: Helm chart in `deploy/helm/eve-industry` (web, worker, scheduler, migrate and install
   Jobs, optional bundled MySQL and Redis, Ingress, autoscaling for web). App pods run non-root on a
   read-only root filesystem and log to the container output. See `docs/self-hosting/kubernetes.md`.
+- Uploads (sponsor banners) can be stored in any S3-compatible bucket: `UPLOADS_DISK=s3` and the
+  `AWS_*` settings in `deploy/.env.example`. The default is still the local `public` disk.
+- Managed databases: MySQL over TLS (`MYSQL_ATTR_SSL_CA`, or the certificate itself in
+  `DB_CA_CERT`), Redis/Valkey over TLS with a username (`REDIS_SCHEME=tls`, `REDIS_USERNAME`), and
+  `deploy/docker-compose.managed-db.yml` to run the Compose stack against an external MySQL.
+- Guides for a DigitalOcean Droplet with Managed MySQL (`docs/self-hosting/digitalocean.md`) and
+  for DigitalOcean App Platform (`docs/self-hosting/digitalocean-app-platform.md`,
+  `deploy/digitalocean-app.yaml`).
 - Image: `APP_ROLE=await-migrations` waits until the database has no pending migrations (the
   chart's init container).
 

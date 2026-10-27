@@ -66,7 +66,7 @@
             <h2 id="sponsors-heading">Sponsors</h2>
             @foreach($sponsors as $sponsor)
             <a class="sponsor-banner" href="{{ $sponsor->url }}" target="_blank" rel="noopener sponsored" title="{{ $sponsor->name }}">
-                <img src="{{ asset('storage/' . $sponsor->image_path) }}" alt="{{ $sponsor->name }}" loading="lazy">
+                <img src="{{ $sponsor->imageUrl() }}" alt="{{ $sponsor->name }}" loading="lazy">
             </a>
             @endforeach
         </aside>
