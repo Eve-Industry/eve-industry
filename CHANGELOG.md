@@ -5,6 +5,8 @@ All notable changes are listed here. Format based on
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-10-27
+
 ### Added
 - Kubernetes: Helm chart in `deploy/helm/eve-industry` (web, worker, scheduler, migrate and install
   Jobs, optional bundled MySQL and Redis, Ingress, autoscaling for web). App pods run non-root on a
@@ -26,6 +28,8 @@ All notable changes are listed here. Format based on
   out their whole grace period (5.5 minutes for the worker) and were then killed. Both now run off
   PID 1 and get SIGTERM on any stop signal, with or without Compose's `init: true`.
 - Containers recreate the `storage/` directories they need, so an empty volume works.
+- Signed-in users with a remember-me cookie no longer get a 500: `User::getAuthPassword()` returns
+  an empty string instead of null for EVE SSO users, who have no password.
 
 ## [1.0.3] - 2026-10-26
 
