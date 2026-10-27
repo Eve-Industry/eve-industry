@@ -1,5 +1,7 @@
 # Eve Industrialist
 
+Hosted Version: [EVE Industry Hosted](https://eveindustry.app)
+
 Self-hostable planning and tracking tools for [EVE Online](https://www.eveonline.com) industrialists.
 Sign in with EVE SSO, link your characters, and use calculators and trackers built on your ESI
 data plus public market data:
