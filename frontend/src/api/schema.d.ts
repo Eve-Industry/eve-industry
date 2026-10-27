@@ -903,8 +903,8 @@ export interface paths {
         put?: never;
         /**
          * Plan corporate fitted ships
-         * @description Same result as the personal plan, but counting only the corporation's
-         *     assets and blueprints (read with the enabling director's token). 404
+         * @description Same result as the personal plan (anything inside a ship does not count
+         *     as available), but counting only the corporation's assets and blueprints (read with the enabling director's token). 404
          *     when corporate build programs are not enabled for your corporation, 403
          *     without a character there, 400 when the director character is gone,
          *     422 when a fitting is not your corporation's.
@@ -1429,11 +1429,14 @@ export interface paths {
         /**
          * Plan fitted ships
          * @description For each item the fittings need: how many are required, how many your
-         *     characters hold (their own assets only, not the corporation's; items
-         *     fitted to ships do not count), what is missing and whether a
+         *     characters hold (their own assets only, not the corporation's; anything
+         *     inside another ship, whether fitted or in its cargo, drone bay or other
+         *     holds, does not count), what is missing and whether a
          *     manufacturing blueprint exists (`buildable`) and you own it.
          *     `ships_fittable` is how many ships of a fitting your stock could fit.
-         *     422 when a fitting is not yours.
+         *     Ships of the fitting's hull you already have fully fitted count toward
+         *     the request (unless `count_fitted_ships` is false) and are listed, with
+         *     partly fitted ones, in `existing_ships`. 422 when a fitting is not yours.
          */
         post: operations["v1.fittings.program.plan"];
         delete?: never;
@@ -4503,6 +4506,7 @@ export interface components {
                 ships: number;
             }[];
             include_hull?: boolean;
+            count_fitted_ships?: boolean;
             location_ids?: number[] | null;
             name: string;
             type_ids?: number[] | null;
@@ -4521,8 +4525,69 @@ export interface components {
             }[];
             /** @description Count the hull as a required item (default true). */
             include_hull?: boolean;
+            /** @description Count ships you already have fully fitted toward the request (default true). */
+            count_fitted_ships?: boolean;
             /** @description Only count stock at these stations/structures (root location ids). */
             location_ids?: number[] | null;
+        };
+        /** FittingPlanResource */
+        FittingPlanResource: {
+            /** @description One row per selected fitting. `ships_fitted` of the wanted `ships` are already
+             *     fitted ships you own (counted); `ships_fittable` also includes the ships your
+             *     stock could fit. `existing_ships` lists your fitted and partly fitted ships of the
+             *     fitting's hull: `status` is `fitted` or `partial`, `counted` says whether a fitted
+             *     ship counts toward `ships`, and `missing` is what a partly fitted ship still lacks.
+             *     `contents` is everything directly inside a ship, each with its ESI `flag` (slots
+             *     such as `HiSlot0`, `Cargo`, `DroneBay`, other holds); items inside containers
+             *     are not listed. */
+            fittings: {
+                fitting_id: number;
+                name: string;
+                ship_type_id: number;
+                ship_type_name: string;
+                ships: number;
+                ships_fitted: number;
+                ships_fittable: number;
+                existing_ships: {
+                    item_id: number;
+                    name: string | null;
+                    location_id: number | null;
+                    location_name: string | null;
+                    status: string;
+                    fitted_count: number;
+                    total_count: number;
+                    counted: boolean;
+                    missing: {
+                        type_id: number;
+                        name: string;
+                        quantity: number;
+                    }[];
+                    contents: {
+                        type_id: number;
+                        name: string;
+                        quantity: number;
+                        flag: string;
+                    }[];
+                }[];
+            }[];
+            /** @description Every item still needed after counting fitted ships. `kind` is `hull`, `fitted`
+             *     (slot items) or `cargo` (loose items and drones). */
+            items: {
+                type_id: number;
+                name: string;
+                kind: string;
+                required: number;
+                on_hand: number;
+                missing: number;
+                buildable: boolean;
+                blueprint_type_id: number | null;
+                blueprint_owned: boolean;
+            }[];
+            summary: {
+                item_types: number;
+                missing_types: number;
+                complete: boolean;
+            };
         };
         /** FittingResource */
         FittingResource: {
@@ -8237,32 +8302,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: {
-                            plan: {
-                                fittings: {
-                                    fitting_id: number;
-                                    name: string;
-                                    ship_type_id: number;
-                                    ship_type_name: string;
-                                    ships: number;
-                                    ships_fittable: number;
-                                }[];
-                                items: {
-                                    type_id: number;
-                                    name: string;
-                                    kind: string;
-                                    required: number;
-                                    on_hand: number;
-                                    missing: number;
-                                    buildable: boolean;
-                                    blueprint_type_id: number | null;
-                                    blueprint_owned: boolean;
-                                }[];
-                                summary: {
-                                    item_types: number;
-                                    missing_types: number;
-                                    complete: boolean;
-                                };
-                            };
+                            plan: components["schemas"]["FittingPlanResource"];
                             character_name: string;
                         };
                         meta: Record<string, never>;
@@ -9258,32 +9298,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data: {
-                            fittings: {
-                                fitting_id: number;
-                                name: string;
-                                ship_type_id: number;
-                                ship_type_name: string;
-                                ships: number;
-                                ships_fittable: number;
-                            }[];
-                            items: {
-                                type_id: number;
-                                name: string;
-                                kind: string;
-                                required: number;
-                                on_hand: number;
-                                missing: number;
-                                buildable: boolean;
-                                blueprint_type_id: number | null;
-                                blueprint_owned: boolean;
-                            }[];
-                            summary: {
-                                item_types: number;
-                                missing_types: number;
-                                complete: boolean;
-                            };
-                        };
+                        data: components["schemas"]["FittingPlanResource"];
                         meta: {
                             [key: string]: unknown;
                         };

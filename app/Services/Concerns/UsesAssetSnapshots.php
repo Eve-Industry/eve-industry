@@ -128,9 +128,11 @@ trait UsesAssetSnapshots
 
     /**
      * Quantity held per type in the user's personal assets only (never the
-     * corporation's), as {type_id: quantity}. Items fitted into a ship's slots
-     * are not stock and are left out. With location ids, only items whose root
-     * station or structure is one of them count.
+     * corporation's), as {type_id: quantity}. Anything inside another ship is
+     * not available stock and is left out: fitted modules, cargo, drone bay
+     * and the rest, including items in containers in a ship's cargo. With
+     * location ids, only items whose root station or structure is one of them
+     * count.
      *
      * @param  list<int>  $typeIds
      * @param  list<int>  $locationIds
@@ -142,7 +144,14 @@ trait UsesAssetSnapshots
         $this->queueMissingSnapshots($userId, $snapshots->count(), count($keys));
         $store = app(AssetSnapshotStore::class);
 
+        $shipTypes = \App\Models\EveType::select('type_id')->whereIn('group_id',
+            \App\Models\InvGroup::select('group_id')->where('category_id', self::SHIP_CATEGORY_ID));
+        $ships = $store->items($snapshots)->whereIn('type_id', $shipTypes)->select('item_id');
+
         $query = $store->items($snapshots)->whereIn('type_id', $typeIds)
+            // Not directly in a ship, and not anywhere below a ship that sits in a station.
+            ->where(fn (Builder $q) => $q->whereNull('parent_item_id')->orWhereNotIn('parent_item_id', $ships))
+            ->where(fn (Builder $q) => $q->whereColumn('root_item_id', 'item_id')->orWhereNotIn('root_item_id', $ships))
             ->where(function (Builder $q) {
                 $q->whereNull('payload->location_flag')
                     ->orWhereNotIn('payload->location_flag', \App\Services\Fittings\FittedSlots::FLAGS);
@@ -157,6 +166,63 @@ trait UsesAssetSnapshots
         }
 
         return [$quantities, $store->metadata($snapshots, count($keys))];
+    }
+
+    /**
+     * The user's own ships of these hulls with what is fitted to each
+     * (`fitted`, slot items only) and everything directly inside them
+     * (`contents`, each with its location flag), from personal assets only.
+     * Bare and packaged hulls come back with both empty; the caller decides
+     * what counts.
+     *
+     * @param  list<int>  $hullTypeIds
+     * @param  list<int>  $locationIds  root station/structure ids; empty means anywhere
+     * @return list<array{item_id: int, type_id: int, name: ?string, location_id: ?int, location_name: ?string, fitted: array<int, int>, contents: list<array{type_id: int, name: string, quantity: int, flag: string}>}>
+     */
+    public function personalAssembledShips(int $userId, array $hullTypeIds, array $locationIds = []): array
+    {
+        [$snapshots] = $this->snapshotContext($userId, 'personal');
+        $store = app(AssetSnapshotStore::class);
+
+        $query = $store->items($snapshots)->whereIn('type_id', $hullTypeIds);
+        if ($locationIds !== []) {
+            $query->whereIn('root_location_id', $locationIds);
+        }
+        $ships = $query->get(['item_id', 'type_id', 'name', 'location_name', 'root_location_id']);
+        if ($ships->isEmpty()) {
+            return [];
+        }
+
+        // Everything directly inside each ship: slot items by their slot, and
+        // cargo, drone bay and the other holds by theirs.
+        $fitted = [];
+        $contents = [];
+        $children = $store->items($snapshots)
+            ->whereIn('parent_item_id', $ships->pluck('item_id'))
+            ->get(['parent_item_id', 'type_id', 'type_name', 'quantity', 'payload']);
+        foreach ($children as $child) {
+            $shipId = (int) $child->parent_item_id;
+            $flag = (string) ($child->payload['location_flag'] ?? '');
+            $contents[$shipId][] = [
+                'type_id' => (int) $child->type_id,
+                'name' => (string) $child->type_name,
+                'quantity' => (int) $child->quantity,
+                'flag' => $flag,
+            ];
+            if (in_array($flag, \App\Services\Fittings\FittedSlots::FLAGS, true)) {
+                $fitted[$shipId][(int) $child->type_id] = ($fitted[$shipId][(int) $child->type_id] ?? 0) + (int) $child->quantity;
+            }
+        }
+
+        return $ships->map(fn ($ship) => [
+            'item_id' => (int) $ship->item_id,
+            'type_id' => (int) $ship->type_id,
+            'name' => $ship->name,
+            'location_id' => $ship->root_location_id !== null ? (int) $ship->root_location_id : null,
+            'location_name' => $ship->location_name,
+            'fitted' => $fitted[(int) $ship->item_id] ?? [],
+            'contents' => $contents[(int) $ship->item_id] ?? [],
+        ])->all();
     }
 
     private function snapshotShipAssets(int $userId): array

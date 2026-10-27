@@ -11,10 +11,14 @@ export type Fitting = PersonalFitting | CorporateFitting
 
 export type FittingPlan = operations['v1.fittings.program.plan']['responses'][200]['content']['application/json']['data']
 export type FittingPlanItem = FittingPlan['items'][number]
+/** A fitted or partly fitted ship you already have, as listed under its fitting. */
+export type ExistingShip = FittingPlan['fittings'][number]['existing_ships'][number]
 
 export interface PlanOptions {
   selections: Array<{ fitting_id: number; ships: number }>
   include_hull: boolean
+  /** Count ships you already have fully fitted toward the ships wanted. */
+  count_fitted_ships: boolean
   location_ids: number[]
 }
 

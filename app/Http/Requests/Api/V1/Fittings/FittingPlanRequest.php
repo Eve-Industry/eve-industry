@@ -22,7 +22,8 @@ class FittingPlanRequest extends ApiRequest
             'selections.*.ships' => 'required|integer|min:1|max:10000',
             /** Count the hull as a required item (default true). */
             'include_hull' => 'boolean',
-            /** Only count stock at these stations/structures (root location ids). */
+            /** Count ships you already have fully fitted toward the request (default true). */
+            'count_fitted_ships' => 'boolean',            /** Only count stock at these stations/structures (root location ids). */
             'location_ids' => 'nullable|array|max:200',
             'location_ids.*' => 'integer',
         ];
@@ -50,5 +51,10 @@ class FittingPlanRequest extends ApiRequest
     public function includeHull(): bool
     {
         return (bool) ($this->validated('include_hull') ?? true);
+    }
+
+    public function countFittedShips(): bool
+    {
+        return (bool) ($this->validated('count_fitted_ships') ?? true);
     }
 }

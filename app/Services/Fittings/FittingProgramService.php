@@ -24,16 +24,18 @@ class FittingProgramService
     /**
      * @param  list<array{fitting_id: int, ships: int}>  $selections
      * @param  list<int>  $locationIds  root station/structure ids; empty counts all stock
-     * @return array{plan: array<string, mixed>, assets: array<string, mixed>}
+     * @param  bool  $countFitted  ships already fitted to a fitting count toward its ships     * @return array{plan: array<string, mixed>, assets: array<string, mixed>}
      *
      * @throws ValidationException when a selection is not one of the user's fittings
      */
-    public function plan(User $user, array $selections, array $locationIds = [], bool $includeHull = true): array
+    public function plan(User $user, array $selections, array $locationIds = [], bool $includeHull = true, bool $countFitted = true): array
     {
         $resolved = $this->resolveSelections($user, $selections);
 
         $typeIds = [];
+        $hullIds = [];
         foreach ($resolved as $selection) {
+            $hullIds[] = (int) $selection['fitting']->ship_type_id;
             $typeIds[] = (int) $selection['fitting']->ship_type_id;
             foreach ($selection['fitting']->items as $item) {
                 $typeIds[] = (int) $item['type_id'];
@@ -41,10 +43,11 @@ class FittingProgramService
         }
 
         [$onHand, $assetMeta] = $this->assets->personalTypeQuantities($user->id, array_values(array_unique($typeIds)), $locationIds);
+        $ships = $this->assets->personalAssembledShips($user->id, array_values(array_unique($hullIds)), $locationIds);
         $owned = array_keys($this->blueprints->getOwnedBlueprints($user));
 
         return [
-            'plan' => $this->planner->plan($resolved, $onHand, $owned, $includeHull),
+            'plan' => $this->planner->plan($resolved, $onHand, $owned, $includeHull, $ships, $countFitted),
             'assets' => $assetMeta,
         ];
     }

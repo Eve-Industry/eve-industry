@@ -4,6 +4,7 @@ export interface NavigationLink {
   stockManager?: boolean
   /** Shown only when this `/me` feature switch is on (see config/features.php). */
   feature?: 'discord_bot'
+  beta?: boolean
 }
 
 export interface NavigationGroup {
@@ -29,19 +30,24 @@ export const navigationGroups: NavigationGroup[] = [
     { label: 'Can Produce', to: '/industry/can-produce' },
     { label: 'Reprocessing Value', to: '/industry/reprocessing' },
     { label: 'Blueprint Research', to: '/industry/blueprint-research' },
-    { label: 'Reaction Formula Research', to: '/industry/reaction-formula-research' },
     { label: 'Stock Manager', to: '/industry/stock-manager', stockManager: true },
   ] },
-  { id: 'industry-planning', label: 'Industry Planning', links: [
+  { id: 'industry-planning', label: 'Build & Invent', links: [
     { label: 'Manufacturing', to: '/calculators/manufacturing' },
     { label: 'Invention Planner', to: '/calculators/invention-planner' },
+    { label: 'Manufacturing Browser', to: '/calculators/manufacturing-browser' },
+    { label: 'Build Programs', to: '/build-programs' },
+  ] },
+  { id: 'reactions', label: 'Reactions', links: [
     { label: 'Reactions Planner', to: '/calculators/reaction-planner' },
     { label: 'Reaction Browser', to: '/calculators/reaction-browser' },
-    { label: 'Manufacturing Browser', to: '/calculators/manufacturing-browser' },
-    { label: 'My Structures', to: '/structures' },
-    { label: 'Build Programs', to: '/build-programs' },
-    { label: 'My Fittings', to: '/fittings' },
-    { label: 'Fitting Program', to: '/fitting-program' },
+    { label: 'Reaction Formula Research', to: '/industry/reaction-formula-research' },
+  ] },
+  { id: 'fittings', label: 'Fittings', links: [
+    { label: 'My Fittings', to: '/fittings', beta: true },
+    { label: 'Fitting Program', to: '/fitting-program', beta: true },
+    { label: 'Corp Fittings', to: '/corporate/fittings', beta: true },
+    { label: 'Corp Fitting Program', to: '/corporate/fitting-program', beta: true },
   ] },
   { id: 'planetary', label: 'Planetary', links: [
     { label: 'PI Dashboard', to: '/planetary' },
@@ -63,8 +69,6 @@ export const navigationGroups: NavigationGroup[] = [
     { label: 'Projects', to: '/corporate/projects' },
     { label: 'Project Contributors', to: '/corporate/projects/contributors' },
     { label: 'Corp Build Programs', to: '/corporate/build-programs' },
-    { label: 'Corp Fittings', to: '/corporate/fittings' },
-    { label: 'Corp Fitting Program', to: '/corporate/fitting-program' },
     { label: 'ESS Tracker', to: '/corporate/ess-tracker' },
     { label: 'Structure Timers', to: '/corporate/structure-vulnerability' },
   ] },

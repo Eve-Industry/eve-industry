@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Fittings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Fittings\FittingBuildProgramRequest;
 use App\Http\Requests\Api\V1\Fittings\FittingPlanRequest;
+use App\Http\Resources\V1\Fittings\FittingPlanResource;
 use App\Http\Resources\V1\Programs\CorporationBuildProgramResource;
 use App\Http\Responses\ApiResponse;
 use App\Services\Fittings\CorporationFittingProgramService;
@@ -28,24 +29,27 @@ class CorporationFittingProgramController extends Controller
     /**
      * Plan corporate fitted ships.
      *
-     * Same result as the personal plan, but counting only the corporation's
-     * assets and blueprints (read with the enabling director's token). 404
+     * Same result as the personal plan (anything inside a ship does not count
+     * as available), but counting only the corporation's assets and blueprints (read with the enabling director's token). 404
      * when corporate build programs are not enabled for your corporation, 403
      * without a character there, 400 when the director character is gone,
      * 422 when a fitting is not your corporation's.
      *
-     * @response array{data: array{plan: array{fittings: list<array{fitting_id: int, name: string, ship_type_id: int, ship_type_name: string, ships: int, ships_fittable: int}>, items: list<array{type_id: int, name: string, kind: string, required: int, on_hand: int, missing: int, buildable: bool, blueprint_type_id: int|null, blueprint_owned: bool}>, summary: array{item_types: int, missing_types: int, complete: bool}}, character_name: string}, meta: object}
+     * @response array{data: array{plan: FittingPlanResource, character_name: string}, meta: object}
      */
     public function plan(FittingPlanRequest $request): JsonResponse
     {
         try {
             $config = $this->program->configFor($request->user());
-            $result = $this->program->plan($config, $request->selections(), $request->locationIds(), $request->includeHull());
+            $result = $this->program->plan($config, $request->selections(), $request->locationIds(), $request->includeHull(), $request->countFittedShips());
         } catch (HeavyServiceException $e) {
             abort($e->status, $e->getMessage());
         }
 
-        return ApiResponse::success($result);
+        return ApiResponse::success([
+            'plan' => (new FittingPlanResource($result['plan']))->resolve(),
+            'character_name' => $result['character_name'],
+        ]);
     }
 
     /**
@@ -60,7 +64,7 @@ class CorporationFittingProgramController extends Controller
     {
         try {
             $config = $this->program->configFor($request->user());
-            $result = $this->program->plan($config, $request->selections(), $request->locationIds(), $request->includeHull());
+            $result = $this->program->plan($config, $request->selections(), $request->locationIds(), $request->includeHull(), $request->countFittedShips());
         } catch (HeavyServiceException $e) {
             abort($e->status, $e->getMessage());
         }

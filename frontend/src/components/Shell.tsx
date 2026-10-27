@@ -6,6 +6,7 @@ import { usePushSync } from '../api/notifications'
 import { InstallPrompt } from './InstallPrompt'
 import { DemoBanner } from './DemoBanner'
 import { PwaStatus } from './PwaStatus'
+import { BetaBadge } from './BetaBadge'
 import { groupForPath, navigationGroups, NAVIGATION_STORAGE_KEY } from './navigation'
 
 function DiscordIcon() {
@@ -70,17 +71,18 @@ export function Shell() {
         <nav id="app-navigation">
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/characters">Characters</NavLink>
+          <NavLink to="/structures">My Structures</NavLink>
           <NavLink to="/notifications">Notifications</NavLink>
           {navigationGroups.filter((group) => !group.admin || me.data?.data.admin).map((group) => {
             const expanded = openGroup === group.id
             return (
               <div className="nav-group" key={group.id}>
                 <button className={`nav-group-toggle${activeGroup === group.id ? ' has-active-page' : ''}`} aria-expanded={expanded} aria-controls={`nav-${group.id}`} onClick={() => setOpenGroup(expanded ? null : group.id)}>
-                  <span>{group.label}</span><span className="nav-chevron" aria-hidden="true">⌄</span>
+                  <span>{group.label}{group.links.every((link) => link.beta) ? <BetaBadge /> : null}</span><span className="nav-chevron" aria-hidden="true">⌄</span>
                 </button>
                 <div id={`nav-${group.id}`} className="nav-submenu" hidden={!expanded}>
                   {group.links.filter((link) => (!link.stockManager || me.data?.data.stock_manager) && (!link.feature || me.data?.data.features?.[link.feature])).map((link) => (
-                    <NavLink key={link.to} to={link.to} end={group.links.some((other) => other.to !== link.to && other.to.startsWith(`${link.to}/`)) || link.to === '/'}>{link.label}</NavLink>
+                    <NavLink key={link.to} to={link.to} end={group.links.some((other) => other.to !== link.to && other.to.startsWith(`${link.to}/`)) || link.to === '/'}>{link.label}{link.beta ? <BetaBadge /> : null}</NavLink>
                   ))}
                 </div>
               </div>

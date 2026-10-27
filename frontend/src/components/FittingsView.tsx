@@ -8,6 +8,7 @@ import {
   type Fitting,
   type FittingScope,
 } from '../api/fittings'
+import { BetaBadge } from './BetaBadge'
 import { WriteError } from './CorpCommon'
 import { formatQty } from './format'
 
@@ -148,7 +149,7 @@ export function FittingsView({ scope }: { scope: FittingScope }) {
 
   return (
     <>
-      <h1>{corporate ? 'Corporate fittings' : 'My fittings'}</h1>
+      <h1>{corporate ? 'Corporate fittings' : 'My fittings'}<BetaBadge /></h1>
       <p>
         {corporate
           ? 'Fittings shared by your corporation. The corporate fitting program checks them against the corporation’s assets.'

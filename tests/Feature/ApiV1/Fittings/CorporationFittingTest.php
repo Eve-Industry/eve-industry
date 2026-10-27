@@ -6,6 +6,7 @@ use App\Models\BlueprintActivity;
 use App\Models\CorporationFitting;
 use App\Models\EveType;
 use App\Models\Fitting;
+use App\Models\InvGroup;
 use App\Services\EsiService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery\MockInterface;
@@ -24,8 +25,10 @@ class CorporationFittingTest extends TestCase
     {
         parent::setUp();
         foreach ([1 => 'Typhoon', 2 => 'Damage Control II', 3 => 'Navy Mjolnir Missile', 34 => 'Tritanium'] as $id => $name) {
-            EveType::create(['type_id' => $id, 'name' => $name]);
+            // Type 1 is a ship, so anything inside one can be told apart from stock.
+            EveType::create(['type_id' => $id, 'name' => $name, 'group_id' => $id === 1 ? 25 : null]);
         }
+        InvGroup::create(['group_id' => 25, 'name' => 'Frigate', 'category_id' => 6, 'published' => true]);
     }
 
     private function corpFitting(int $corporationId = 98000001, array $attrs = []): CorporationFitting
@@ -187,6 +190,74 @@ class CorporationFittingTest extends TestCase
         $this->assertSame([2, 1, 1], [$items[1]['required'], $items[1]['on_hand'], $items[1]['missing']]);
         $this->assertSame([2, 1, 1], [$items[2]['required'], $items[2]['on_hand'], $items[2]['missing']]);
         $this->assertSame([200, 150, 50], [$items[3]['required'], $items[3]['on_hand'], $items[3]['missing']]);
+    }
+
+    public function test_plan_counts_ships_the_corporation_has_fitted_and_lists_partly_fitted_ones(): void
+    {
+        $user = $this->corpUser('member');
+        $fitting = $this->corpFitting(attrs: ['items' => [
+            ['type_id' => 2, 'name' => 'Damage Control II', 'quantity' => 2, 'section' => 'fitted'],
+            ['type_id' => 3, 'name' => 'Navy Mjolnir Missile', 'quantity' => 100, 'section' => 'cargo'],
+        ]]);
+        $this->mockEsi([
+            // A fully fitted Typhoon, a half fitted one and a bare one.
+            $this->corpAsset(10, 1, 1),
+            array_merge($this->corpAsset(11, 2, 2, 'LoSlot0'), ['location_id' => 10, 'location_type' => 'item']),
+            array_merge($this->corpAsset(12, 3, 7, 'Cargo'), ['location_id' => 10, 'location_type' => 'item']),
+            $this->corpAsset(20, 1, 1),
+            array_merge($this->corpAsset(21, 2, 1, 'LoSlot0'), ['location_id' => 20, 'location_type' => 'item']),
+            $this->corpAsset(30, 1, 1),
+            $this->corpAsset(3, 3, 100),
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/api/v1/corporation/fitting-program/plan', [
+            'selections' => [['fitting_id' => $fitting->id, 'ships' => 2]],
+        ])->assertOk()
+            ->assertJsonPath('data.plan.fittings.0.ships_fitted', 1)
+            ->assertJsonCount(2, 'data.plan.fittings.0.existing_ships')
+            ->assertJsonPath('data.plan.fittings.0.existing_ships.0.item_id', 10)
+            ->assertJsonPath('data.plan.fittings.0.existing_ships.0.status', 'fitted')
+            ->assertJsonPath('data.plan.fittings.0.existing_ships.0.counted', true)
+            // Contents are named from the SDE, slots before holds.
+            ->assertJsonPath('data.plan.fittings.0.existing_ships.0.contents', [
+                ['type_id' => 2, 'name' => 'Damage Control II', 'quantity' => 2, 'flag' => 'LoSlot0'],
+                ['type_id' => 3, 'name' => 'Navy Mjolnir Missile', 'quantity' => 7, 'flag' => 'Cargo'],
+            ])
+            ->assertJsonPath('data.plan.fittings.0.existing_ships.1.item_id', 20)
+            ->assertJsonPath('data.plan.fittings.0.existing_ships.1.status', 'partial')
+            ->assertJsonPath('data.plan.fittings.0.existing_ships.1.missing.0.quantity', 1);
+
+        $items = collect($response->json('data.plan.items'))->keyBy('type_id');
+        // One ship left to fit: the two loose hulls cover it, but the fitted ones are not stock.
+        $this->assertSame([1, 2, 0], [$items[1]['required'], $items[1]['on_hand'], $items[1]['missing']]);
+        $this->assertSame([2, 0, 2], [$items[2]['required'], $items[2]['on_hand'], $items[2]['missing']]);
+        // The 7 missiles in the fitted ship's cargo are not available, only the 100 in the hangar.
+        $this->assertSame([200, 100, 100], [$items[3]['required'], $items[3]['on_hand'], $items[3]['missing']]);
+    }
+
+    public function test_nothing_inside_a_corporation_ship_counts_as_available(): void
+    {
+        $user = $this->corpUser('member');
+        $fitting = $this->corpFitting();
+        $inItem = fn (array $asset, int $parent, string $flag = 'Cargo') => array_merge($asset, ['location_id' => $parent, 'location_type' => 'item', 'location_flag' => $flag]);
+        $this->mockEsi([
+            $this->corpAsset(3, 3, 100),
+            // A container in the hangar with 20 missiles in it counts.
+            $this->corpAsset(50, 9, 1),
+            $inItem($this->corpAsset(51, 3, 20), 50, 'Unlocked'),
+            // A ship with a container of missiles and loose ones in its cargo does not.
+            $this->corpAsset(10, 1, 1),
+            $inItem($this->corpAsset(11, 3, 30), 10),
+            $inItem($this->corpAsset(12, 9, 1), 10),
+            $inItem($this->corpAsset(13, 3, 400), 12, 'Unlocked'),
+        ]);
+
+        $items = collect($this->actingAs($user)->postJson('/api/v1/corporation/fitting-program/plan', [
+            'selections' => [['fitting_id' => $fitting->id, 'ships' => 1]],
+            'count_fitted_ships' => false,
+        ])->assertOk()->json('data.plan.items'))->keyBy('type_id');
+
+        $this->assertSame(120, $items[3]['on_hand']);
     }
 
     public function test_plan_flags_owned_corporation_blueprints(): void

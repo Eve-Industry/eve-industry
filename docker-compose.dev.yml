@@ -17,6 +17,8 @@ services:
     volumes:
       - ./:/var/www
       - ./docker/php.ini:/usr/local/etc/php/conf.d/local.ini
+      # Re-read edited PHP files on each request (opcache.ini is production-tuned).
+      - ./docker/opcache.dev.ini:/usr/local/etc/php/conf.d/zzz-opcache-dev.ini
     networks:
       - eve-auth
     depends_on:

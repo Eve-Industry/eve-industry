@@ -4,11 +4,14 @@ import {
   useCreateFittingBuildProgram,
   useFittingPlan,
   useFittings,
+  type ExistingShip,
+  type FittingPlan,
   type FittingPlanItem,
   type FittingScope,
   type PlanOptions,
 } from '../api/fittings'
 import { useAssetsByLocation } from '../api/queries'
+import { BetaBadge } from './BetaBadge'
 import { WriteError } from './CorpCommon'
 import { formatQty } from './format'
 import { LocationFilter, type FilterLocation } from './LocationFilter'
@@ -79,6 +82,211 @@ function ItemRow({ item, build, onToggle }: { item: FittingPlanItem; build: bool
   )
 }
 
+/** The fitted and partly fitted ships you already own for one fitting, with what each still lacks. */
+function ExistingShips({ fitting }: { fitting: FittingPlan['fittings'][number] }) {
+  return (
+    <section className="panel" aria-label={`Existing ${fitting.name} ships`}>
+      <h2 className="subhead">
+        {fitting.name} ships you already have{' '}
+        <span className="muted small">
+          {fitting.ships_fitted} of {fitting.ships} wanted already fitted
+        </span>
+      </h2>
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>Ship</th>
+            <th>Location</th>
+            <th>Fit</th>
+            <th>Status</th>
+            <th>
+              <span className="visually-hidden">Contents</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {fitting.existing_ships.map((ship) => (
+            <ShipRow key={ship.item_id} ship={ship} hullName={fitting.ship_type_name} />
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )
+}
+
+/** Slot flag prefix → heading, in the order the fitting window shows them. */
+const SLOT_GROUPS: Array<[prefix: string, title: string]> = [
+  ['HiSlot', 'High slots'],
+  ['MedSlot', 'Mid slots'],
+  ['LoSlot', 'Low slots'],
+  ['RigSlot', 'Rig slots'],
+  ['SubSystemSlot', 'Subsystems'],
+]
+
+export interface ContentLine {
+  key: string
+  /** `Slot 3` for a fitted item, empty for the lines of a hold. */
+  slot: string
+  name: string
+  quantity: number
+}
+
+/** "DroneBay" → "Drone bay". */
+function holdName(flag: string): string {
+  const words = flag.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
+
+/**
+ * Split what is inside a ship into the fitted slots, the cargo hold (kept on
+ * its own) and every other hold (drone bay, fighter bay and so on).
+ */
+export function groupShipContents(contents: ExistingShip['contents']): {
+  slots: Array<{ title: string; lines: ContentLine[] }>
+  cargo: ContentLine[]
+  holds: Array<{ title: string; lines: ContentLine[] }>
+} {
+  const line = (item: ExistingShip['contents'][number], index: number, slot = ''): ContentLine => ({
+    key: `${item.flag}-${item.type_id}-${index}`,
+    slot,
+    name: item.name,
+    quantity: item.quantity,
+  })
+  const byName = (a: ContentLine, b: ContentLine) => a.name.localeCompare(b.name)
+
+  /** 1-based slot number of `HiSlot0`-style flags, or null for anything else. */
+  const slotNumber = (flag: string, prefix: string): number | null => {
+    const match = new RegExp(`^${prefix}(\\d+)$`).exec(flag)
+    return match ? Number(match[1]) + 1 : null
+  }
+  const isSlot = (flag: string) => SLOT_GROUPS.some(([prefix]) => slotNumber(flag, prefix) !== null)
+
+  const slots = SLOT_GROUPS.map(([prefix, title]) => ({
+    title,
+    lines: contents
+      .filter((item) => slotNumber(item.flag, prefix) !== null)
+      .map((item, i) => line(item, i, `Slot ${slotNumber(item.flag, prefix)}`)),
+  })).filter((group) => group.lines.length > 0)
+
+  const cargo = contents.filter((item) => item.flag === 'Cargo').map((item, i) => line(item, i)).sort(byName)
+
+  const otherFlags = [...new Set(contents.map((item) => item.flag))]
+    .filter((flag) => flag !== 'Cargo' && !isSlot(flag))
+    .sort()
+  const holds = otherFlags.map((flag) => ({
+    title: flag === '' ? 'Other' : holdName(flag),
+    lines: contents.filter((item) => item.flag === flag).map((item, i) => line(item, i)).sort(byName),
+  }))
+
+  return { slots, cargo, holds }
+}
+
+function ContentList({ title, lines }: { title: string; lines: ContentLine[] }) {
+  return (
+    <div>
+      <h3 className="ship-contents-title">{title}</h3>
+      <ul className="ship-contents-list small">
+        {lines.map((l) => (
+          <li key={l.key}>
+            {l.slot ? <span className="muted">{l.slot} · </span> : null}
+            {l.quantity > 1 ? `${formatQty(l.quantity)} × ` : ''}
+            {l.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/** One ship you already have, with a row underneath showing what is inside it. */
+function ShipRow({ ship, hullName }: { ship: ExistingShip; hullName: string }) {
+  const [open, setOpen] = useState(false)
+  const label = ship.name ?? hullName
+  const { slots, cargo, holds } = groupShipContents(ship.contents)
+  const empty = slots.length === 0 && cargo.length === 0 && holds.length === 0
+
+  return (
+    <>
+      <tr>
+        <td>{label}</td>
+        <td>{ship.location_name ?? 'Unknown location'}</td>
+        <td className="num">
+          {ship.fitted_count}/{ship.total_count}
+        </td>
+        <td>
+          {ship.status === 'fitted' ? (
+            ship.counted ? (
+              <span className="badge badge-fresh">Fitted · counted</span>
+            ) : (
+              <span className="badge">Fitted · not needed</span>
+            )
+          ) : (
+            <details>
+              <summary>
+                <span className="badge">Partly fitted</span>
+              </summary>
+              <ul className="small">
+                {ship.missing.map((m) => (
+                  <li key={m.type_id}>
+                    Needs {formatQty(m.quantity)} × {m.name}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </td>
+        <td className="ship-toggle-cell">
+          <button
+            type="button"
+            className="button small ship-toggle"
+            aria-expanded={open}
+            aria-label={`${open ? 'Hide' : 'Show'} contents of ${label}`}
+            onClick={() => setOpen(!open)}
+          >
+            {open ? '▾' : '▸'}
+          </button>
+        </td>
+      </tr>
+      {open ? (
+        <tr className="ship-contents">
+          <td colSpan={5}>
+            {empty ? (
+              <p className="muted small">Nothing inside this ship.</p>
+            ) : (
+              <div className="ship-contents-grid">
+                {slots.length > 0 ? (
+                  <div className="ship-contents-fitted">
+                    <h3 className="ship-contents-heading">Fitted</h3>
+                    <div className="ship-contents-columns">
+                      {slots.map((g) => (
+                        <ContentList key={g.title} title={g.title} lines={g.lines} />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {cargo.length > 0 ? (
+                  <div className="ship-contents-cargo">
+                    <h3 className="ship-contents-heading">Cargo</h3>
+                    <ContentList title="Cargo hold" lines={cargo} />
+                  </div>
+                ) : null}
+                {holds.length > 0 ? (
+                  <div className="ship-contents-holds">
+                    <h3 className="ship-contents-heading">Other holds</h3>
+                    {holds.map((g) => (
+                      <ContentList key={g.title} title={g.title} lines={g.lines} />
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </td>
+        </tr>
+      ) : null}
+    </>
+  )
+}
+
 /** The fitting program: how many fitted ships your stock covers, and what to build or buy. */
 export function FittingProgramView({ scope }: { scope: FittingScope }) {
   const corporate = scope === 'corporate'
@@ -87,6 +295,7 @@ export function FittingProgramView({ scope }: { scope: FittingScope }) {
   const locations = useStockLocations(scope)
   const [ships, setShips] = useState<Record<number, number>>({})
   const [includeHull, setIncludeHull] = useState(true)
+  const [countFitted, setCountFitted] = useState(true)
   const [locationIds, setLocationIds] = useState<number[]>([])
   const [skipped, setSkipped] = useState<number[]>([])
   const [programName, setProgramName] = useState('')
@@ -96,6 +305,7 @@ export function FittingProgramView({ scope }: { scope: FittingScope }) {
       .filter(([, n]) => n > 0)
       .map(([id, n]) => ({ fitting_id: Number(id), ships: n })),
     include_hull: includeHull,
+    count_fitted_ships: countFitted,
     location_ids: locationIds,
   }
   const planQuery = useFittingPlan(scope, options)
@@ -118,7 +328,7 @@ export function FittingProgramView({ scope }: { scope: FittingScope }) {
 
   return (
     <>
-      <h1>{corporate ? 'Corporate fitting program' : 'Fitting program'}</h1>
+      <h1>{corporate ? 'Corporate fitting program' : 'Fitting program'}<BetaBadge /></h1>
       <p>
         Choose how many fitted ships you want of each fitting. The table shows what{' '}
         {corporate ? 'the corporation’s' : 'your characters’'} assets already cover and what is missing, so you can decide what to build
@@ -140,7 +350,7 @@ export function FittingProgramView({ scope }: { scope: FittingScope }) {
       ) : null}
 
       {list && list.fittings.length > 0 && (!corporate || (list.enabled && list.canView)) ? (
-        <>
+        <div className="fitting-stack">
           <section className="panel">
             <h2 className="subhead">Ships wanted</h2>
             <table className="data-table">
@@ -149,6 +359,7 @@ export function FittingProgramView({ scope }: { scope: FittingScope }) {
                   <th>Fitting</th>
                   <th>Hull</th>
                   <th className="num">Ships</th>
+                  <th className="num">Already fitted</th>
                   <th className="num">Fittable now</th>
                 </tr>
               </thead>
@@ -172,6 +383,7 @@ export function FittingProgramView({ scope }: { scope: FittingScope }) {
                           onChange={(e) => setShips({ ...ships, [f.id]: Math.max(0, Math.floor(Number(e.target.value) || 0)) })}
                         />
                       </td>
+                      <td className="num">{row ? row.ships_fitted : '—'}</td>
                       <td className="num">{row ? `${row.ships_fittable} / ${row.ships}` : '—'}</td>
                     </tr>
                   )
@@ -182,7 +394,10 @@ export function FittingProgramView({ scope }: { scope: FittingScope }) {
               <label>
                 <input type="checkbox" checked={includeHull} onChange={(e) => setIncludeHull(e.target.checked)} /> Count the hull
               </label>
-              <LocationFilter
+              <label>
+                <input type="checkbox" checked={countFitted} onChange={(e) => setCountFitted(e.target.checked)} /> Count ships already
+                fitted
+              </label>              <LocationFilter
                 label="Stock"
                 hint="Only count items at these stations and structures. Nothing ticked counts everything."
                 locations={locations}
@@ -196,6 +411,12 @@ export function FittingProgramView({ scope }: { scope: FittingScope }) {
           {options.selections.length === 0 ? <p className="panel">Enter a number of ships for at least one fitting.</p> : null}
           {planQuery.isError ? <WriteError error={planQuery.error} fallback="Could not plan these ships." /> : null}
           {planQuery.isFetching && !plan ? <p>Checking your stock…</p> : null}
+
+          {plan && options.selections.length > 0
+            ? plan.fittings
+                .filter((f) => f.existing_ships.length > 0)
+                .map((f) => <ExistingShips key={f.fitting_id} fitting={f} />)
+            : null}
 
           {plan && options.selections.length > 0 ? (
             <section className="panel" aria-live="polite">
@@ -255,7 +476,7 @@ export function FittingProgramView({ scope }: { scope: FittingScope }) {
               <WriteError error={createProgram.error} fallback="Could not create the build program." />
             </section>
           ) : null}
-        </>
+        </div>
       ) : null}
     </>
   )

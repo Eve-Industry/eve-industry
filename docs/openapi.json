@@ -3971,7 +3971,7 @@
         "/corporation/fitting-program/plan": {
             "post": {
                 "operationId": "v1.fittings.corporation.program.plan",
-                "description": "Same result as the personal plan, but counting only the corporation's\nassets and blueprints (read with the enabling director's token). 404\nwhen corporate build programs are not enabled for your corporation, 403\nwithout a character there, 400 when the director character is gone,\n422 when a fitting is not your corporation's.",
+                "description": "Same result as the personal plan (anything inside a ship does not count\nas available), but counting only the corporation's assets and blueprints (read with the enabling director's token). 404\nwhen corporate build programs are not enabled for your corporation, 403\nwithout a character there, 400 when the director character is gone,\n422 when a fitting is not your corporation's.",
                 "summary": "Plan corporate fitted ships",
                 "tags": [
                     "CorporationFittingProgram"
@@ -3998,116 +3998,7 @@
                                             "type": "object",
                                             "properties": {
                                                 "plan": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "fittings": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "type": "object",
-                                                                "properties": {
-                                                                    "fitting_id": {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    "name": {
-                                                                        "type": "string"
-                                                                    },
-                                                                    "ship_type_id": {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    "ship_type_name": {
-                                                                        "type": "string"
-                                                                    },
-                                                                    "ships": {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    "ships_fittable": {
-                                                                        "type": "integer"
-                                                                    }
-                                                                },
-                                                                "required": [
-                                                                    "fitting_id",
-                                                                    "name",
-                                                                    "ship_type_id",
-                                                                    "ship_type_name",
-                                                                    "ships",
-                                                                    "ships_fittable"
-                                                                ]
-                                                            }
-                                                        },
-                                                        "items": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "type": "object",
-                                                                "properties": {
-                                                                    "type_id": {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    "name": {
-                                                                        "type": "string"
-                                                                    },
-                                                                    "kind": {
-                                                                        "type": "string"
-                                                                    },
-                                                                    "required": {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    "on_hand": {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    "missing": {
-                                                                        "type": "integer"
-                                                                    },
-                                                                    "buildable": {
-                                                                        "type": "boolean"
-                                                                    },
-                                                                    "blueprint_type_id": {
-                                                                        "type": [
-                                                                            "integer",
-                                                                            "null"
-                                                                        ]
-                                                                    },
-                                                                    "blueprint_owned": {
-                                                                        "type": "boolean"
-                                                                    }
-                                                                },
-                                                                "required": [
-                                                                    "type_id",
-                                                                    "name",
-                                                                    "kind",
-                                                                    "required",
-                                                                    "on_hand",
-                                                                    "missing",
-                                                                    "buildable",
-                                                                    "blueprint_type_id",
-                                                                    "blueprint_owned"
-                                                                ]
-                                                            }
-                                                        },
-                                                        "summary": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "item_types": {
-                                                                    "type": "integer"
-                                                                },
-                                                                "missing_types": {
-                                                                    "type": "integer"
-                                                                },
-                                                                "complete": {
-                                                                    "type": "boolean"
-                                                                }
-                                                            },
-                                                            "required": [
-                                                                "item_types",
-                                                                "missing_types",
-                                                                "complete"
-                                                            ]
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "fittings",
-                                                        "items",
-                                                        "summary"
-                                                    ]
+                                                    "$ref": "#/components/schemas/FittingPlanResource"
                                                 },
                                                 "character_name": {
                                                     "type": "string"
@@ -6762,7 +6653,7 @@
         "/fitting-program/plan": {
             "post": {
                 "operationId": "v1.fittings.program.plan",
-                "description": "For each item the fittings need: how many are required, how many your\ncharacters hold (their own assets only, not the corporation's; items\nfitted to ships do not count), what is missing and whether a\nmanufacturing blueprint exists (`buildable`) and you own it.\n`ships_fittable` is how many ships of a fitting your stock could fit.\n422 when a fitting is not yours.",
+                "description": "For each item the fittings need: how many are required, how many your\ncharacters hold (their own assets only, not the corporation's; anything\ninside another ship, whether fitted or in its cargo, drone bay or other\nholds, does not count), what is missing and whether a\nmanufacturing blueprint exists (`buildable`) and you own it.\n`ships_fittable` is how many ships of a fitting your stock could fit.\nShips of the fitting's hull you already have fully fitted count toward\nthe request (unless `count_fitted_ships` is false) and are listed, with\npartly fitted ones, in `existing_ships`. 422 when a fitting is not yours.",
                 "summary": "Plan fitted ships",
                 "tags": [
                     "FittingProgram"
@@ -6786,116 +6677,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "fittings": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "fitting_id": {
-                                                                "type": "integer"
-                                                            },
-                                                            "name": {
-                                                                "type": "string"
-                                                            },
-                                                            "ship_type_id": {
-                                                                "type": "integer"
-                                                            },
-                                                            "ship_type_name": {
-                                                                "type": "string"
-                                                            },
-                                                            "ships": {
-                                                                "type": "integer"
-                                                            },
-                                                            "ships_fittable": {
-                                                                "type": "integer"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "fitting_id",
-                                                            "name",
-                                                            "ship_type_id",
-                                                            "ship_type_name",
-                                                            "ships",
-                                                            "ships_fittable"
-                                                        ]
-                                                    }
-                                                },
-                                                "items": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type_id": {
-                                                                "type": "integer"
-                                                            },
-                                                            "name": {
-                                                                "type": "string"
-                                                            },
-                                                            "kind": {
-                                                                "type": "string"
-                                                            },
-                                                            "required": {
-                                                                "type": "integer"
-                                                            },
-                                                            "on_hand": {
-                                                                "type": "integer"
-                                                            },
-                                                            "missing": {
-                                                                "type": "integer"
-                                                            },
-                                                            "buildable": {
-                                                                "type": "boolean"
-                                                            },
-                                                            "blueprint_type_id": {
-                                                                "type": [
-                                                                    "integer",
-                                                                    "null"
-                                                                ]
-                                                            },
-                                                            "blueprint_owned": {
-                                                                "type": "boolean"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "type_id",
-                                                            "name",
-                                                            "kind",
-                                                            "required",
-                                                            "on_hand",
-                                                            "missing",
-                                                            "buildable",
-                                                            "blueprint_type_id",
-                                                            "blueprint_owned"
-                                                        ]
-                                                    }
-                                                },
-                                                "summary": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "item_types": {
-                                                            "type": "integer"
-                                                        },
-                                                        "missing_types": {
-                                                            "type": "integer"
-                                                        },
-                                                        "complete": {
-                                                            "type": "boolean"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "item_types",
-                                                        "missing_types",
-                                                        "complete"
-                                                    ]
-                                                }
-                                            },
-                                            "required": [
-                                                "fittings",
-                                                "items",
-                                                "summary"
-                                            ]
+                                            "$ref": "#/components/schemas/FittingPlanResource"
                                         },
                                         "meta": {
                                             "type": "object",
@@ -19205,6 +18987,9 @@
                     "include_hull": {
                         "type": "boolean"
                     },
+                    "count_fitted_ships": {
+                        "type": "boolean"
+                    },
                     "location_ids": {
                         "type": [
                             "array",
@@ -19276,6 +19061,10 @@
                         "type": "boolean",
                         "description": "Count the hull as a required item (default true)."
                     },
+                    "count_fitted_ships": {
+                        "type": "boolean",
+                        "description": "Count ships you already have fully fitted toward the request (default true)."
+                    },
                     "location_ids": {
                         "type": [
                             "array",
@@ -19292,6 +19081,227 @@
                     "selections"
                 ],
                 "title": "FittingPlanRequest"
+            },
+            "FittingPlanResource": {
+                "type": "object",
+                "properties": {
+                    "fittings": {
+                        "type": "array",
+                        "description": "One row per selected fitting. `ships_fitted` of the wanted `ships` are already\nfitted ships you own (counted); `ships_fittable` also includes the ships your\nstock could fit. `existing_ships` lists your fitted and partly fitted ships of the\nfitting's hull: `status` is `fitted` or `partial`, `counted` says whether a fitted\nship counts toward `ships`, and `missing` is what a partly fitted ship still lacks.\n`contents` is everything directly inside a ship, each with its ESI `flag` (slots\nsuch as `HiSlot0`, `Cargo`, `DroneBay`, other holds); items inside containers\nare not listed.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "fitting_id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "ship_type_id": {
+                                    "type": "integer"
+                                },
+                                "ship_type_name": {
+                                    "type": "string"
+                                },
+                                "ships": {
+                                    "type": "integer"
+                                },
+                                "ships_fitted": {
+                                    "type": "integer"
+                                },
+                                "ships_fittable": {
+                                    "type": "integer"
+                                },
+                                "existing_ships": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "item_id": {
+                                                "type": "integer"
+                                            },
+                                            "name": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "location_id": {
+                                                "type": [
+                                                    "integer",
+                                                    "null"
+                                                ]
+                                            },
+                                            "location_name": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "status": {
+                                                "type": "string"
+                                            },
+                                            "fitted_count": {
+                                                "type": "integer"
+                                            },
+                                            "total_count": {
+                                                "type": "integer"
+                                            },
+                                            "counted": {
+                                                "type": "boolean"
+                                            },
+                                            "missing": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type_id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "quantity": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type_id",
+                                                        "name",
+                                                        "quantity"
+                                                    ]
+                                                }
+                                            },
+                                            "contents": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type_id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "quantity": {
+                                                            "type": "integer"
+                                                        },
+                                                        "flag": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type_id",
+                                                        "name",
+                                                        "quantity",
+                                                        "flag"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "required": [
+                                            "item_id",
+                                            "name",
+                                            "location_id",
+                                            "location_name",
+                                            "status",
+                                            "fitted_count",
+                                            "total_count",
+                                            "counted",
+                                            "missing",
+                                            "contents"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "fitting_id",
+                                "name",
+                                "ship_type_id",
+                                "ship_type_name",
+                                "ships",
+                                "ships_fitted",
+                                "ships_fittable",
+                                "existing_ships"
+                            ]
+                        }
+                    },
+                    "items": {
+                        "type": "array",
+                        "description": "Every item still needed after counting fitted ships. `kind` is `hull`, `fitted`\n(slot items) or `cargo` (loose items and drones).",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type_id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "kind": {
+                                    "type": "string"
+                                },
+                                "required": {
+                                    "type": "integer"
+                                },
+                                "on_hand": {
+                                    "type": "integer"
+                                },
+                                "missing": {
+                                    "type": "integer"
+                                },
+                                "buildable": {
+                                    "type": "boolean"
+                                },
+                                "blueprint_type_id": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                },
+                                "blueprint_owned": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "type_id",
+                                "name",
+                                "kind",
+                                "required",
+                                "on_hand",
+                                "missing",
+                                "buildable",
+                                "blueprint_type_id",
+                                "blueprint_owned"
+                            ]
+                        }
+                    },
+                    "summary": {
+                        "type": "object",
+                        "properties": {
+                            "item_types": {
+                                "type": "integer"
+                            },
+                            "missing_types": {
+                                "type": "integer"
+                            },
+                            "complete": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "item_types",
+                            "missing_types",
+                            "complete"
+                        ]
+                    }
+                },
+                "required": [
+                    "fittings",
+                    "items",
+                    "summary"
+                ],
+                "title": "FittingPlanResource"
             },
             "FittingResource": {
                 "type": "object",
