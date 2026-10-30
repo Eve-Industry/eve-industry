@@ -3701,6 +3701,388 @@
                 }
             }
         },
+        "/corporation/fittings": {
+            "get": {
+                "operationId": "v1.fittings.corporation.index",
+                "description": "Whether corporate build programs are enabled for your corporation, what\nyou may do and the fittings, newest change first. Never 403, so the page\ncan explain why it is empty.",
+                "summary": "Corporate fittings",
+                "tags": [
+                    "CorporationFitting"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "enabled": {
+                                                    "type": "boolean"
+                                                },
+                                                "can_view": {
+                                                    "type": "boolean"
+                                                },
+                                                "can_manage": {
+                                                    "type": "boolean"
+                                                },
+                                                "corporation_name": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "fittings": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/CorporationFittingResource"
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "enabled",
+                                                "can_view",
+                                                "can_manage",
+                                                "corporation_name",
+                                                "fittings"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1.fittings.corporation.store",
+                "description": "Needs the feature enabled and a Director, CEO or Factory Manager\ncharacter (403 otherwise). 422 as for personal fittings. Returns 201.",
+                "summary": "Save a corporate fitting from EFT text",
+                "tags": [
+                    "CorporationFitting"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreFittingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CorporationFittingResource"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/corporation/fittings/{fitting}": {
+            "get": {
+                "operationId": "v1.fittings.corporation.show",
+                "description": "Another corporation's fitting is 404, as is any when the feature is not\nenabled for yours.",
+                "summary": "A corporate fitting",
+                "tags": [
+                    "CorporationFitting"
+                ],
+                "parameters": [
+                    {
+                        "name": "fitting",
+                        "in": "path",
+                        "required": true,
+                        "description": "The fitting ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CorporationFittingResource"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1.fittings.corporation.update",
+                "summary": "Rename a corporate fitting, or replace its contents with new EFT text",
+                "tags": [
+                    "CorporationFitting"
+                ],
+                "parameters": [
+                    {
+                        "name": "fitting",
+                        "in": "path",
+                        "required": true,
+                        "description": "The fitting ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFittingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CorporationFittingResource"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1.fittings.corporation.destroy",
+                "summary": "Delete a corporate fitting",
+                "tags": [
+                    "CorporationFitting"
+                ],
+                "parameters": [
+                    {
+                        "name": "fitting",
+                        "in": "path",
+                        "required": true,
+                        "description": "The fitting ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/corporation/fitting-program/plan": {
+            "post": {
+                "operationId": "v1.fittings.corporation.program.plan",
+                "description": "Same result as the personal plan (anything inside a ship does not count\nas available), but counting only the corporation's assets and blueprints (read with the enabling director's token). 404\nwhen corporate build programs are not enabled for your corporation, 403\nwithout a character there, 400 when the director character is gone,\n422 when a fitting is not your corporation's.",
+                "summary": "Plan corporate fitted ships",
+                "tags": [
+                    "CorporationFittingProgram"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FittingPlanRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "plan": {
+                                                    "$ref": "#/components/schemas/FittingPlanResource"
+                                                },
+                                                "character_name": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "plan",
+                                                "character_name"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/corporation/fitting-program/build-program": {
+            "post": {
+                "operationId": "v1.fittings.corporation.program.build-program",
+                "description": "Needs the same role as creating any corporate build program (403\notherwise). 422 when nothing needs building. Returns 201.",
+                "summary": "Create a corporate build program for the shortfall",
+                "tags": [
+                    "CorporationFittingProgram"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FittingBuildProgramRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CorporationBuildProgramResource"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/admin/dashboard": {
             "get": {
                 "operationId": "v1.admin.dashboard",
@@ -5797,6 +6179,577 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/fittings": {
+            "get": {
+                "operationId": "v1.fittings.index",
+                "description": "Newest change first, with the hull and every item.",
+                "summary": "Your fittings",
+                "tags": [
+                    "Fitting"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/FittingResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "v1.fittings.store",
+                "description": "422 on `eft` for an unknown hull, no items, or unknown item names\nunless `ignore_unmatched` is set. Returns 201.",
+                "summary": "Save a fitting from EFT text",
+                "tags": [
+                    "Fitting"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreFittingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/FittingResource"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/fittings/parse": {
+            "post": {
+                "operationId": "v1.fittings.parse",
+                "description": "Items are aggregated by type. `ship` is null when the hull is not\nrecognised and `unmatched` lists item names that are not.",
+                "summary": "Preview pasted EFT text without saving",
+                "tags": [
+                    "Fitting"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ParseFittingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "ship": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "type_id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type_id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "name": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "type_id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "quantity": {
+                                                                "type": "integer"
+                                                            },
+                                                            "section": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "type_id",
+                                                            "name",
+                                                            "quantity",
+                                                            "section"
+                                                        ]
+                                                    }
+                                                },
+                                                "unmatched": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "ship",
+                                                "name",
+                                                "items",
+                                                "unmatched"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/fittings/{fitting}": {
+            "get": {
+                "operationId": "v1.fittings.show",
+                "summary": "A fitting",
+                "tags": [
+                    "Fitting"
+                ],
+                "parameters": [
+                    {
+                        "name": "fitting",
+                        "in": "path",
+                        "required": true,
+                        "description": "The fitting ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/FittingResource"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "v1.fittings.update",
+                "summary": "Rename a fitting, or replace its contents with new EFT text",
+                "tags": [
+                    "Fitting"
+                ],
+                "parameters": [
+                    {
+                        "name": "fitting",
+                        "in": "path",
+                        "required": true,
+                        "description": "The fitting ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFittingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/FittingResource"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "v1.fittings.destroy",
+                "summary": "Delete a fitting",
+                "tags": [
+                    "Fitting"
+                ],
+                "parameters": [
+                    {
+                        "name": "fitting",
+                        "in": "path",
+                        "required": true,
+                        "description": "The fitting ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/corporation/fittings/parse": {
+            "post": {
+                "operationId": "v1.fittings.corporation.parse",
+                "description": "Items are aggregated by type. `ship` is null when the hull is not\nrecognised and `unmatched` lists item names that are not.",
+                "summary": "Preview pasted EFT text without saving",
+                "tags": [
+                    "Fitting"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ParseFittingRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "ship": {
+                                                    "type": [
+                                                        "object",
+                                                        "null"
+                                                    ],
+                                                    "properties": {
+                                                        "type_id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type_id",
+                                                        "name"
+                                                    ]
+                                                },
+                                                "name": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "type_id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "quantity": {
+                                                                "type": "integer"
+                                                            },
+                                                            "section": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "type_id",
+                                                            "name",
+                                                            "quantity",
+                                                            "section"
+                                                        ]
+                                                    }
+                                                },
+                                                "unmatched": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "ship",
+                                                "name",
+                                                "items",
+                                                "unmatched"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/fitting-program/plan": {
+            "post": {
+                "operationId": "v1.fittings.program.plan",
+                "description": "For each item the fittings need: how many are required, how many your\ncharacters hold (their own assets only, not the corporation's; anything\ninside another ship, whether fitted or in its cargo, drone bay or other\nholds, does not count), what is missing and whether a\nmanufacturing blueprint exists (`buildable`) and you own it.\n`ships_fittable` is how many ships of a fitting your stock could fit.\nShips of the fitting's hull you already have fully fitted count toward\nthe request (unless `count_fitted_ships` is false) and are listed, with\npartly fitted ones, in `existing_ships`. 422 when a fitting is not yours.",
+                "summary": "Plan fitted ships",
+                "tags": [
+                    "FittingProgram"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FittingPlanRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/FittingPlanResource"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "additionalProperties": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/fitting-program/build-program": {
+            "post": {
+                "operationId": "v1.fittings.program.build-program",
+                "description": "Plans the same way as `plan`, then builds the missing items that have a\nmanufacturing blueprint (all of them, or only `type_ids`). 422 when\nnothing needs building. Returns 201.",
+                "summary": "Create a build program for the shortfall",
+                "tags": [
+                    "FittingProgram"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FittingBuildProgramRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/BuildProgramResource"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -16594,6 +17547,80 @@
                 ],
                 "title": "CorporationBuildProgramResource"
             },
+            "CorporationFittingResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "corporation_id": {
+                        "type": "integer"
+                    },
+                    "created_by_user_id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "ship_type_id": {
+                        "type": "integer"
+                    },
+                    "ship_type_name": {
+                        "type": "string"
+                    },
+                    "items": {
+                        "type": "array",
+                        "description": "`section` is `fitted` or `cargo`.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type_id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "quantity": {
+                                    "type": "integer"
+                                },
+                                "section": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type_id",
+                                "name",
+                                "quantity",
+                                "section"
+                            ]
+                        }
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "corporation_id",
+                    "created_by_user_id",
+                    "name",
+                    "ship_type_id",
+                    "ship_type_name",
+                    "items",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "CorporationFittingResource"
+            },
             "CorporationLocationFilterRequest": {
                 "type": "object",
                 "description": "Location filters of a corporate build program.",
@@ -17929,6 +18956,418 @@
                     "recent_payouts"
                 ],
                 "title": "EssSystemResource"
+            },
+            "FittingBuildProgramRequest": {
+                "type": "object",
+                "description": "Turn the shortfall of a fitting program into a build program.",
+                "properties": {
+                    "selections": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "fitting_id": {
+                                    "type": "integer"
+                                },
+                                "ships": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 10000
+                                }
+                            },
+                            "required": [
+                                "fitting_id",
+                                "ships"
+                            ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 20,
+                        "uniqueItems": true
+                    },
+                    "include_hull": {
+                        "type": "boolean"
+                    },
+                    "count_fitted_ships": {
+                        "type": "boolean"
+                    },
+                    "location_ids": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "integer"
+                        },
+                        "maxItems": 200
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "type_ids": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "integer"
+                        },
+                        "maxItems": 500
+                    },
+                    "me": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 10
+                    }
+                },
+                "required": [
+                    "selections",
+                    "name"
+                ],
+                "title": "FittingBuildProgramRequest"
+            },
+            "FittingPlanRequest": {
+                "type": "object",
+                "description": "Which fittings, and how many ships of each, a fitting program plans for.\nUsed for personal and corporate fittings alike.",
+                "properties": {
+                    "selections": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "fitting_id": {
+                                    "type": "integer"
+                                },
+                                "ships": {
+                                    "type": "integer",
+                                    "description": "Ships wanted of this fitting.",
+                                    "minimum": 1,
+                                    "maximum": 10000
+                                }
+                            },
+                            "required": [
+                                "fitting_id",
+                                "ships"
+                            ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 20,
+                        "uniqueItems": true
+                    },
+                    "include_hull": {
+                        "type": "boolean",
+                        "description": "Count the hull as a required item (default true)."
+                    },
+                    "count_fitted_ships": {
+                        "type": "boolean",
+                        "description": "Count ships you already have fully fitted toward the request (default true)."
+                    },
+                    "location_ids": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "description": "Only count stock at these stations/structures (root location ids).",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "maxItems": 200
+                    }
+                },
+                "required": [
+                    "selections"
+                ],
+                "title": "FittingPlanRequest"
+            },
+            "FittingPlanResource": {
+                "type": "object",
+                "properties": {
+                    "fittings": {
+                        "type": "array",
+                        "description": "One row per selected fitting. `ships_fitted` of the wanted `ships` are already\nfitted ships you own (counted); `ships_fittable` also includes the ships your\nstock could fit. `existing_ships` lists your fitted and partly fitted ships of the\nfitting's hull: `status` is `fitted` or `partial`, `counted` says whether a fitted\nship counts toward `ships`, and `missing` is what a partly fitted ship still lacks.\n`contents` is everything directly inside a ship, each with its ESI `flag` (slots\nsuch as `HiSlot0`, `Cargo`, `DroneBay`, other holds); items inside containers\nare not listed.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "fitting_id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "ship_type_id": {
+                                    "type": "integer"
+                                },
+                                "ship_type_name": {
+                                    "type": "string"
+                                },
+                                "ships": {
+                                    "type": "integer"
+                                },
+                                "ships_fitted": {
+                                    "type": "integer"
+                                },
+                                "ships_fittable": {
+                                    "type": "integer"
+                                },
+                                "existing_ships": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "item_id": {
+                                                "type": "integer"
+                                            },
+                                            "name": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "location_id": {
+                                                "type": [
+                                                    "integer",
+                                                    "null"
+                                                ]
+                                            },
+                                            "location_name": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            },
+                                            "status": {
+                                                "type": "string"
+                                            },
+                                            "fitted_count": {
+                                                "type": "integer"
+                                            },
+                                            "total_count": {
+                                                "type": "integer"
+                                            },
+                                            "counted": {
+                                                "type": "boolean"
+                                            },
+                                            "missing": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type_id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "quantity": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type_id",
+                                                        "name",
+                                                        "quantity"
+                                                    ]
+                                                }
+                                            },
+                                            "contents": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type_id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "quantity": {
+                                                            "type": "integer"
+                                                        },
+                                                        "flag": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "type_id",
+                                                        "name",
+                                                        "quantity",
+                                                        "flag"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "required": [
+                                            "item_id",
+                                            "name",
+                                            "location_id",
+                                            "location_name",
+                                            "status",
+                                            "fitted_count",
+                                            "total_count",
+                                            "counted",
+                                            "missing",
+                                            "contents"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "fitting_id",
+                                "name",
+                                "ship_type_id",
+                                "ship_type_name",
+                                "ships",
+                                "ships_fitted",
+                                "ships_fittable",
+                                "existing_ships"
+                            ]
+                        }
+                    },
+                    "items": {
+                        "type": "array",
+                        "description": "Every item still needed after counting fitted ships. `kind` is `hull`, `fitted`\n(slot items) or `cargo` (loose items and drones).",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type_id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "kind": {
+                                    "type": "string"
+                                },
+                                "required": {
+                                    "type": "integer"
+                                },
+                                "on_hand": {
+                                    "type": "integer"
+                                },
+                                "missing": {
+                                    "type": "integer"
+                                },
+                                "buildable": {
+                                    "type": "boolean"
+                                },
+                                "blueprint_type_id": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                },
+                                "blueprint_owned": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "type_id",
+                                "name",
+                                "kind",
+                                "required",
+                                "on_hand",
+                                "missing",
+                                "buildable",
+                                "blueprint_type_id",
+                                "blueprint_owned"
+                            ]
+                        }
+                    },
+                    "summary": {
+                        "type": "object",
+                        "properties": {
+                            "item_types": {
+                                "type": "integer"
+                            },
+                            "missing_types": {
+                                "type": "integer"
+                            },
+                            "complete": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "item_types",
+                            "missing_types",
+                            "complete"
+                        ]
+                    }
+                },
+                "required": [
+                    "fittings",
+                    "items",
+                    "summary"
+                ],
+                "title": "FittingPlanResource"
+            },
+            "FittingResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "ship_type_id": {
+                        "type": "integer"
+                    },
+                    "ship_type_name": {
+                        "type": "string"
+                    },
+                    "items": {
+                        "type": "array",
+                        "description": "`section` is `fitted` or `cargo`.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type_id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "quantity": {
+                                    "type": "integer"
+                                },
+                                "section": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type_id",
+                                "name",
+                                "quantity",
+                                "section"
+                            ]
+                        }
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "ship_type_id",
+                    "ship_type_name",
+                    "items",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "FittingResource"
             },
             "FormulaStockRequest": {
                 "type": "object",
@@ -21169,6 +22608,20 @@
                     "last_scanned_at"
                 ],
                 "title": "MoonScanSystemResource"
+            },
+            "ParseFittingRequest": {
+                "type": "object",
+                "description": "Preview how EFT text parses, without saving.",
+                "properties": {
+                    "eft": {
+                        "type": "string",
+                        "maxLength": 20000
+                    }
+                },
+                "required": [
+                    "eft"
+                ],
+                "title": "ParseFittingRequest"
             },
             "PlanetResource": {
                 "type": "object",
@@ -24492,6 +25945,33 @@
                 ],
                 "title": "StoreBuildProgramRequest"
             },
+            "StoreFittingRequest": {
+                "type": "object",
+                "description": "Save a fitting from pasted EFT text (also used for corporate fittings).",
+                "properties": {
+                    "eft": {
+                        "type": "string",
+                        "description": "The EFT export, starting with the `[Ship, Fit name]` line.",
+                        "maxLength": 20000
+                    },
+                    "name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Defaults to the fit name in the EFT header.",
+                        "maxLength": 100
+                    },
+                    "ignore_unmatched": {
+                        "type": "boolean",
+                        "description": "Save even when some item names are not recognised (they are dropped)."
+                    }
+                },
+                "required": [
+                    "eft"
+                ],
+                "title": "StoreFittingRequest"
+            },
             "StoreReactionPlanProgramRequest": {
                 "type": "object",
                 "description": "Create a reaction build program from reaction plan entries.",
@@ -25096,6 +26576,24 @@
                     "icon_url"
                 ],
                 "title": "TypeSummaryResource"
+            },
+            "UpdateFittingRequest": {
+                "type": "object",
+                "description": "Rename a fitting, or replace its contents with new EFT text.",
+                "properties": {
+                    "eft": {
+                        "type": "string",
+                        "maxLength": 20000
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "ignore_unmatched": {
+                        "type": "boolean"
+                    }
+                },
+                "title": "UpdateFittingRequest"
             },
             "UpdateStockItemRequest": {
                 "type": "object",

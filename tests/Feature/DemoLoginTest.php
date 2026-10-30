@@ -81,6 +81,21 @@ class DemoLoginTest extends TestCase
         $this->postJson('/api/v1/station-configs', [])->assertStatus(422);
     }
 
+    public function test_demo_account_can_use_personal_fittings_but_not_corporate_ones(): void
+    {
+        $this->actingAs($this->demoUser());
+
+        // Reaches validation instead of being rejected as a demo user.
+        $this->postJson('/api/v1/fittings', [])->assertStatus(422);
+        $this->postJson('/api/v1/fittings/parse', [])->assertStatus(422);
+        $this->postJson('/api/v1/fitting-program/plan', [])->assertStatus(422);
+        $this->postJson('/api/v1/fitting-program/build-program', [])->assertStatus(422);
+
+        foreach (['/api/v1/corporation/fittings', '/api/v1/corporation/fitting-program/plan'] as $url) {
+            $this->postJson($url, [])->assertForbidden()->assertJsonPath('code', 'demo_restricted');
+        }
+    }
+
     public function test_starting_an_eve_login_signs_the_demo_session_out(): void
     {
         $this->actingAs($this->demoUser());

@@ -842,6 +842,101 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/corporation/fittings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Corporate fittings
+         * @description Whether corporate build programs are enabled for your corporation, what
+         *     you may do and the fittings, newest change first. Never 403, so the page
+         *     can explain why it is empty.
+         */
+        get: operations["v1.fittings.corporation.index"];
+        put?: never;
+        /**
+         * Save a corporate fitting from EFT text
+         * @description Needs the feature enabled and a Director, CEO or Factory Manager
+         *     character (403 otherwise). 422 as for personal fittings. Returns 201.
+         */
+        post: operations["v1.fittings.corporation.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/corporation/fittings/{fitting}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A corporate fitting
+         * @description Another corporation's fitting is 404, as is any when the feature is not
+         *     enabled for yours.
+         */
+        get: operations["v1.fittings.corporation.show"];
+        /** Rename a corporate fitting, or replace its contents with new EFT text */
+        put: operations["v1.fittings.corporation.update"];
+        post?: never;
+        /** Delete a corporate fitting */
+        delete: operations["v1.fittings.corporation.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/corporation/fitting-program/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Plan corporate fitted ships
+         * @description Same result as the personal plan (anything inside a ship does not count
+         *     as available), but counting only the corporation's assets and blueprints (read with the enabling director's token). 404
+         *     when corporate build programs are not enabled for your corporation, 403
+         *     without a character there, 400 when the director character is gone,
+         *     422 when a fitting is not your corporation's.
+         */
+        post: operations["v1.fittings.corporation.program.plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/corporation/fitting-program/build-program": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a corporate build program for the shortfall
+         * @description Needs the same role as creating any corporate build program (403
+         *     otherwise). 422 when nothing needs building. Returns 201.
+         */
+        post: operations["v1.fittings.corporation.program.build-program"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/dashboard": {
         parameters: {
             query?: never;
@@ -1230,6 +1325,142 @@ export interface paths {
         get: operations["v1.calculators.factory-planner"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fittings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Your fittings
+         * @description Newest change first, with the hull and every item.
+         */
+        get: operations["v1.fittings.index"];
+        put?: never;
+        /**
+         * Save a fitting from EFT text
+         * @description 422 on `eft` for an unknown hull, no items, or unknown item names
+         *     unless `ignore_unmatched` is set. Returns 201.
+         */
+        post: operations["v1.fittings.store"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fittings/parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview pasted EFT text without saving
+         * @description Items are aggregated by type. `ship` is null when the hull is not
+         *     recognised and `unmatched` lists item names that are not.
+         */
+        post: operations["v1.fittings.parse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fittings/{fitting}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A fitting */
+        get: operations["v1.fittings.show"];
+        /** Rename a fitting, or replace its contents with new EFT text */
+        put: operations["v1.fittings.update"];
+        post?: never;
+        /** Delete a fitting */
+        delete: operations["v1.fittings.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/corporation/fittings/parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview pasted EFT text without saving
+         * @description Items are aggregated by type. `ship` is null when the hull is not
+         *     recognised and `unmatched` lists item names that are not.
+         */
+        post: operations["v1.fittings.corporation.parse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fitting-program/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Plan fitted ships
+         * @description For each item the fittings need: how many are required, how many your
+         *     characters hold (their own assets only, not the corporation's; anything
+         *     inside another ship, whether fitted or in its cargo, drone bay or other
+         *     holds, does not count), what is missing and whether a
+         *     manufacturing blueprint exists (`buildable`) and you own it.
+         *     `ships_fittable` is how many ships of a fitting your stock could fit.
+         *     Ships of the fitting's hull you already have fully fitted count toward
+         *     the request (unless `count_fitted_ships` is false) and are listed, with
+         *     partly fitted ones, in `existing_ships`. 422 when a fitting is not yours.
+         */
+        post: operations["v1.fittings.program.plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fitting-program/build-program": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a build program for the shortfall
+         * @description Plans the same way as `plan`, then builds the missing items that have a
+         *     manufacturing blueprint (all of them, or only `type_ids`). 422 when
+         *     nothing needs building. Returns 201.
+         */
+        post: operations["v1.fittings.program.build-program"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3876,6 +4107,24 @@ export interface components {
             created_at: string | null;
             updated_at: string | null;
         };
+        /** CorporationFittingResource */
+        CorporationFittingResource: {
+            id: number;
+            corporation_id: number;
+            created_by_user_id: number;
+            name: string;
+            ship_type_id: number;
+            ship_type_name: string;
+            /** @description `section` is `fitted` or `cargo`. */
+            items: {
+                type_id: number;
+                name: string;
+                quantity: number;
+                section: string;
+            }[];
+            created_at: string | null;
+            updated_at: string | null;
+        };
         /**
          * CorporationLocationFilterRequest
          * @description Location filters of a corporate build program.
@@ -4246,6 +4495,115 @@ export interface components {
                 amount_isk: number | null;
                 notes: string | null;
             }[];
+        };
+        /**
+         * FittingBuildProgramRequest
+         * @description Turn the shortfall of a fitting program into a build program.
+         */
+        FittingBuildProgramRequest: {
+            selections: {
+                fitting_id: number;
+                ships: number;
+            }[];
+            include_hull?: boolean;
+            count_fitted_ships?: boolean;
+            location_ids?: number[] | null;
+            name: string;
+            type_ids?: number[] | null;
+            me?: number | null;
+        };
+        /**
+         * FittingPlanRequest
+         * @description Which fittings, and how many ships of each, a fitting program plans for.
+         *     Used for personal and corporate fittings alike.
+         */
+        FittingPlanRequest: {
+            selections: {
+                fitting_id: number;
+                /** @description Ships wanted of this fitting. */
+                ships: number;
+            }[];
+            /** @description Count the hull as a required item (default true). */
+            include_hull?: boolean;
+            /** @description Count ships you already have fully fitted toward the request (default true). */
+            count_fitted_ships?: boolean;
+            /** @description Only count stock at these stations/structures (root location ids). */
+            location_ids?: number[] | null;
+        };
+        /** FittingPlanResource */
+        FittingPlanResource: {
+            /** @description One row per selected fitting. `ships_fitted` of the wanted `ships` are already
+             *     fitted ships you own (counted); `ships_fittable` also includes the ships your
+             *     stock could fit. `existing_ships` lists your fitted and partly fitted ships of the
+             *     fitting's hull: `status` is `fitted` or `partial`, `counted` says whether a fitted
+             *     ship counts toward `ships`, and `missing` is what a partly fitted ship still lacks.
+             *     `contents` is everything directly inside a ship, each with its ESI `flag` (slots
+             *     such as `HiSlot0`, `Cargo`, `DroneBay`, other holds); items inside containers
+             *     are not listed. */
+            fittings: {
+                fitting_id: number;
+                name: string;
+                ship_type_id: number;
+                ship_type_name: string;
+                ships: number;
+                ships_fitted: number;
+                ships_fittable: number;
+                existing_ships: {
+                    item_id: number;
+                    name: string | null;
+                    location_id: number | null;
+                    location_name: string | null;
+                    status: string;
+                    fitted_count: number;
+                    total_count: number;
+                    counted: boolean;
+                    missing: {
+                        type_id: number;
+                        name: string;
+                        quantity: number;
+                    }[];
+                    contents: {
+                        type_id: number;
+                        name: string;
+                        quantity: number;
+                        flag: string;
+                    }[];
+                }[];
+            }[];
+            /** @description Every item still needed after counting fitted ships. `kind` is `hull`, `fitted`
+             *     (slot items) or `cargo` (loose items and drones). */
+            items: {
+                type_id: number;
+                name: string;
+                kind: string;
+                required: number;
+                on_hand: number;
+                missing: number;
+                buildable: boolean;
+                blueprint_type_id: number | null;
+                blueprint_owned: boolean;
+            }[];
+            summary: {
+                item_types: number;
+                missing_types: number;
+                complete: boolean;
+            };
+        };
+        /** FittingResource */
+        FittingResource: {
+            id: number;
+            name: string;
+            ship_type_id: number;
+            ship_type_name: string;
+            /** @description `section` is `fitted` or `cargo`. */
+            items: {
+                type_id: number;
+                name: string;
+                quantity: number;
+                section: string;
+            }[];
+            created_at: string | null;
+            updated_at: string | null;
         };
         /**
          * FormulaStockRequest
@@ -5031,6 +5389,13 @@ export interface components {
             pricing_mode: string;
             /** @description ISO 8601. */
             last_scanned_at: string | null;
+        };
+        /**
+         * ParseFittingRequest
+         * @description Preview how EFT text parses, without saving.
+         */
+        ParseFittingRequest: {
+            eft: string;
         };
         /** PlanetResource */
         PlanetResource: {
@@ -5902,6 +6267,18 @@ export interface components {
             } | null;
         };
         /**
+         * StoreFittingRequest
+         * @description Save a fitting from pasted EFT text (also used for corporate fittings).
+         */
+        StoreFittingRequest: {
+            /** @description The EFT export, starting with the `[Ship, Fit name]` line. */
+            eft: string;
+            /** @description Defaults to the fit name in the EFT header. */
+            name?: string | null;
+            /** @description Save even when some item names are not recognised (they are dropped). */
+            ignore_unmatched?: boolean;
+        };
+        /**
          * StoreReactionPlanProgramRequest
          * @description Create a reaction build program from reaction plan entries.
          */
@@ -6063,6 +6440,15 @@ export interface components {
             name: string;
             group_id: number | null;
             icon_url: string;
+        };
+        /**
+         * UpdateFittingRequest
+         * @description Rename a fitting, or replace its contents with new EFT text.
+         */
+        UpdateFittingRequest: {
+            eft?: string;
+            name?: string;
+            ignore_unmatched?: boolean;
         };
         /**
          * UpdateStockItemRequest
@@ -7753,6 +8139,209 @@ export interface operations {
             422: components["responses"]["ValidationException"];
         };
     };
+    "v1.fittings.corporation.index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            enabled: boolean;
+                            can_view: boolean;
+                            can_manage: boolean;
+                            corporation_name: string | null;
+                            fittings: components["schemas"]["CorporationFittingResource"][];
+                        };
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "v1.fittings.corporation.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreFittingRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CorporationFittingResource"];
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "v1.fittings.corporation.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The fitting ID */
+                fitting: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CorporationFittingResource"];
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "v1.fittings.corporation.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The fitting ID */
+                fitting: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateFittingRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CorporationFittingResource"];
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "v1.fittings.corporation.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The fitting ID */
+                fitting: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "v1.fittings.corporation.program.plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FittingPlanRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            plan: components["schemas"]["FittingPlanResource"];
+                            character_name: string;
+                        };
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "v1.fittings.corporation.program.build-program": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FittingBuildProgramRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CorporationBuildProgramResource"];
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
     "v1.admin.dashboard": {
         parameters: {
             query?: never;
@@ -8468,6 +9057,284 @@ export interface operations {
                 };
             };
             401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "v1.fittings.index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FittingResource"][];
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+        };
+    };
+    "v1.fittings.store": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StoreFittingRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FittingResource"];
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "v1.fittings.parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParseFittingRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            ship: {
+                                type_id: number;
+                                name: string;
+                            } | null;
+                            name: string | null;
+                            items: {
+                                type_id: number;
+                                name: string;
+                                quantity: number;
+                                section: string;
+                            }[];
+                            unmatched: string[];
+                        };
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "v1.fittings.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The fitting ID */
+                fitting: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FittingResource"];
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "v1.fittings.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The fitting ID */
+                fitting: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateFittingRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FittingResource"];
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "v1.fittings.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The fitting ID */
+                fitting: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
+            404: components["responses"]["ModelNotFoundException"];
+        };
+    };
+    "v1.fittings.corporation.parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParseFittingRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            ship: {
+                                type_id: number;
+                                name: string;
+                            } | null;
+                            name: string | null;
+                            items: {
+                                type_id: number;
+                                name: string;
+                                quantity: number;
+                                section: string;
+                            }[];
+                            unmatched: string[];
+                        };
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "v1.fittings.program.plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FittingPlanRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FittingPlanResource"];
+                        meta: {
+                            [key: string]: unknown;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            422: components["responses"]["ValidationException"];
+        };
+    };
+    "v1.fittings.program.build-program": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FittingBuildProgramRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["BuildProgramResource"];
+                        meta: Record<string, never>;
+                    };
+                };
+            };
+            401: components["responses"]["AuthenticationException"];
+            403: components["responses"]["AuthorizationException"];
             422: components["responses"]["ValidationException"];
         };
     };

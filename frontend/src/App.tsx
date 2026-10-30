@@ -51,6 +51,10 @@ const ContractAppraisal = lazy(() => import('./pages/ContractAppraisal'))
 const ContractBrowser = lazy(() => import('./pages/ContractBrowser'))
 const ContractDetail = lazy(() => import('./pages/ContractDetail'))
 const Structures = lazy(() => import('./pages/Structures'))
+const Fittings = lazy(() => import('./pages/Fittings'))
+const FittingProgram = lazy(() => import('./pages/FittingProgram'))
+const CorporateFittings = lazy(() => import('./pages/CorporateFittings'))
+const CorporateFittingProgram = lazy(() => import('./pages/CorporateFittingProgram'))
 const Reactions = lazy(() => import('./pages/Reactions'))
 const ReactionPlanner = lazy(() => import('./pages/ReactionPlanner'))
 const InventionPlanner = lazy(() => import('./pages/InventionPlanner'))
@@ -115,6 +119,10 @@ export function App() {
           <Route path="tools/contract-browser" element={<ContractBrowser />} />
           <Route path="tools/contract-browser/:contractId" element={<ContractDetail />} />
           <Route path="structures" element={<Structures />} />
+          <Route path="fittings" element={<Fittings />} />
+          <Route path="fitting-program" element={<FittingProgram />} />
+          <Route path="corporate/fittings" element={<CorporateFittings />} />
+          <Route path="corporate/fitting-program" element={<CorporateFittingProgram />} />
           <Route path="*" element={<p>Page not found.</p>} />
         </Route>
       </Routes>

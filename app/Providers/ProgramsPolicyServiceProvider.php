@@ -4,10 +4,14 @@ namespace App\Providers;
 
 use App\Models\BuildProgram;
 use App\Models\CorporationBuildProgram;
+use App\Models\CorporationFitting;
+use App\Models\Fitting;
 use App\Models\IndustryStockItem;
 use App\Models\StationConfig;
 use App\Policies\BuildProgramPolicy;
 use App\Policies\CorporationBuildProgramPolicy;
+use App\Policies\CorporationFittingPolicy;
+use App\Policies\FittingPolicy;
 use App\Policies\IndustryStockItemPolicy;
 use App\Policies\StationConfigPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -23,6 +27,8 @@ class ProgramsPolicyServiceProvider extends ServiceProvider
         Gate::policy(BuildProgram::class, BuildProgramPolicy::class);
         Gate::policy(CorporationBuildProgram::class, CorporationBuildProgramPolicy::class);
         Gate::policy(StationConfig::class, StationConfigPolicy::class);
+        Gate::policy(Fitting::class, FittingPolicy::class);
+        Gate::policy(CorporationFitting::class, CorporationFittingPolicy::class);
         Gate::policy(IndustryStockItem::class, IndustryStockItemPolicy::class);
     }
 }

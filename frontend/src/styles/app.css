@@ -378,6 +378,25 @@ tr.detail > td { background: rgba(var(--accent2-rgb), 0.04); }
 .picked { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
 .form-actions { display: flex; gap: 0.5rem; }
 .form-actions.stacked { flex-direction: column; }
+/* Fitting program: panels one under another with room between them, and the
+   option and action rows kept clear of the table above. */
+.fitting-stack { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1rem; }
+.fitting-stack .page-actions, .fitting-stack .form-actions { flex-wrap: wrap; margin-top: 1rem; }
+.fitting-stack .page-actions { gap: 0.75rem 1.25rem; }
+.fitting-stack .form-actions { align-items: center; gap: 0.75rem; }
+/* What is inside an existing ship: fitted slots, cargo and other holds side by side. */
+.ship-toggle { min-width: 1.75rem; padding: 0.1rem 0.4rem; }
+.beta-badge { display: inline-block; margin-left: 0.5em; padding: 0 0.4em; border: 1px solid currentColor; border-radius: 3px; font-size: 0.65em; font-weight: 600; letter-spacing: 0.06em; line-height: 1.5; text-transform: uppercase; vertical-align: middle; opacity: 0.75; }
+h1 .beta-badge { font-size: 0.4em; }
+.ship-toggle-cell { width: 1%; text-align: right; white-space: nowrap; }
+.ship-contents > td { padding: 0.5rem 0.75rem 1rem; }
+.ship-contents-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.25rem 2rem; }
+.ship-contents-fitted { grid-column: 1 / -1; }
+.ship-contents-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.75rem 2rem; }
+.ship-contents-heading { margin: 0 0 0.35rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+.ship-contents-title { margin: 0 0 0.2rem; font-size: 0.85rem; }
+.ship-contents-list { list-style: none; margin: 0 0 0.5rem; padding: 0; }
+.ship-contents-list li { padding: 0.1rem 0; }
 .character-card { flex-direction: column; align-items: center; }
 .character-card > div { align-self: stretch; }
 .character-card img { width: 200px; height: 200px; }

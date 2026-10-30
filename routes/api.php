@@ -43,4 +43,5 @@ Route::middleware(['auth:sanctum', 'demo-guard'])->name('api.v1.')->group(functi
     require __DIR__.'/api_v1/admin.php';
     require __DIR__.'/api_v1/planetary.php';
     require __DIR__.'/api_v1/industry.php';
+    require __DIR__.'/api_v1/fittings.php';
 });
