@@ -33,7 +33,7 @@
     "fake-indexeddb": "6.0.0",
     "jsdom": "25.0.1",
     "openapi-typescript": "7.5.2",
-    "size-limit": "11.1.6",
+    "size-limit": "13.1.1",
     "typescript": "5.7.2",
     "vite": "6.0.7",
     "vite-plugin-pwa": "0.21.1",
