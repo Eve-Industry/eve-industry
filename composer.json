@@ -12,7 +12,7 @@
         "laravel/horizon": "^5.0",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.12",
-        "laravel/tinker": "^2.10.1",
+        "laravel/tinker": "^3.0.2",
         "league/flysystem-aws-s3-v3": "^3.0",
         "minishlink/web-push": "^11.0",
         "socialiteproviders/eveonline": "^4.3"
